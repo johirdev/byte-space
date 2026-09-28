@@ -1,2 +1,307 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   ByteSpace — Global Style Guide
+   Source: claude/global/{colors,typhography,layout-grid-colors}.png
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Fonts (CSS variables are injected by next/font in src/fonts/index.ts)
+   -------------------------------------------------------------------------- */
+@theme inline {
+  --font-heading: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  /* ------------------------------------------------------------------------
+     2. Colors
+     Usage: bg-primary-600, text-neutral-500, border-secondary-500 ...
+     ------------------------------------------------------------------------ */
+
+  /* Neutral — Black */
+  --color-neutral-50: #f5f5f6;
+  --color-neutral-100: #e5e6e8;
+  --color-neutral-200: #ced0d3;
+  --color-neutral-300: #abaeb5;
+  --color-neutral-400: #82868e;
+  --color-neutral-500: #666973;
+  --color-neutral-600: #585a62;
+  --color-neutral-700: #4b4c53;
+  --color-neutral-800: #424348;
+  --color-neutral-900: #3a3b3f;
+  --color-neutral-950: #242528;
+
+  /* Primary — Electric Violet (brand blue) */
+  --color-primary-50: #e7f6ff;
+  --color-primary-100: #d3eeff;
+  --color-primary-200: #b0ddff;
+  --color-primary-300: #81c5ff;
+  --color-primary-400: #4f9dff;
+  --color-primary-500: #2872ff;
+  --color-primary-600: #0445ff;
+  --color-primary-700: #0043ff;
+  --color-primary-800: #003be2;
+  --color-primary-900: #0b36a4;
+  --color-primary-950: #071e5f;
+
+  /* Secondary — Crimson (brand lime) */
+  --color-secondary-50: #fdffe4;
+  --color-secondary-100: #faffc5;
+  --color-secondary-200: #f2ff92;
+  --color-secondary-300: #e4ff54;
+  --color-secondary-400: #d4fb20;
+  --color-secondary-500: #cbfc01;
+  --color-secondary-600: #8cb400;
+  --color-secondary-700: #6a8902;
+  --color-secondary-800: #546b09;
+  --color-secondary-900: #465a0d;
+  --color-secondary-950: #243300;
+
+  /* Semantic aliases — bg-primary, text-foreground, bg-accent ... */
+  --color-primary: var(--color-primary-600);
+  --color-secondary: var(--color-secondary-500);
+  --color-accent: var(--color-secondary-500);
+  --color-background: #ffffff;
+  --color-surface: var(--color-neutral-50);
+  --color-foreground: var(--color-neutral-950);
+  --color-muted: var(--color-neutral-500);
+  --color-border: var(--color-neutral-100);
+
+  /* ------------------------------------------------------------------------
+     3. Typography tokens
+     Usage: text-heading-l (size + line-height + weight),
+     or the full presets below: heading-l, body-m, label-s ...
+     ------------------------------------------------------------------------ */
+
+  /* Heading — Poppins SemiBold, line-height 120% */
+  --text-heading-l: 4.5rem; /* 72px */
+  --text-heading-l--line-height: 1.2;
+  --text-heading-l--font-weight: 600;
+  --text-heading-m: 2.75rem; /* 44px */
+  --text-heading-m--line-height: 1.2;
+  --text-heading-m--font-weight: 600;
+  --text-heading-s: 2.25rem; /* 36px */
+  --text-heading-s--line-height: 1.2;
+  --text-heading-s--font-weight: 600;
+  --text-heading-xs: 1.25rem; /* 20px */
+  --text-heading-xs--line-height: 1.2;
+  --text-heading-xs--font-weight: 600;
+
+  /* Body — Satoshi Regular, line-height 160% */
+  --text-body-l: 1.125rem; /* 18px */
+  --text-body-l--line-height: 1.6;
+  --text-body-m: 1rem; /* 16px */
+  --text-body-m--line-height: 1.6;
+  --text-body-s: 0.875rem; /* 14px */
+  --text-body-s--line-height: 1.6;
+  --text-body-xs: 0.75rem; /* 12px */
+  --text-body-xs--line-height: 1.6;
+
+  /* Label — Satoshi Medium, line-height 120% */
+  --text-label-l: 1.125rem; /* 18px */
+  --text-label-l--line-height: 1.2;
+  --text-label-l--font-weight: 500;
+  --text-label-m: 1rem; /* 16px */
+  --text-label-m--line-height: 1.2;
+  --text-label-m--font-weight: 500;
+  --text-label-s: 0.875rem; /* 14px */
+  --text-label-s--line-height: 1.2;
+  --text-label-s--font-weight: 500;
+  --text-label-xs: 0.75rem; /* 12px */
+  --text-label-xs--line-height: 1.2;
+  --text-label-xs--font-weight: 500;
+
+  /* ------------------------------------------------------------------------
+     4. Layout grid — 12 columns, 120px margin, 40px gutter (1440px frame)
+     ------------------------------------------------------------------------ */
+  --container-site: 75rem; /* 1200px content = 1440 - 2 × 120 */
+
+  /* ------------------------------------------------------------------------
+     5. Radius & shadows (from the landing page cards / pills)
+     ------------------------------------------------------------------------ */
+  --radius-card: 1rem;
+  --radius-button: 9999px;
+  --shadow-card: 0 4px 24px 0 rgb(36 37 40 / 0.06);
+  --shadow-card-hover: 0 12px 40px 0 rgb(36 37 40 / 0.12);
+}
+
+/* Responsive grid values (mobile → tablet → desktop) */
+:root {
+  --grid-columns: 12;
+  --grid-margin: 1rem; /* 16px */
+  --grid-gutter: 1rem; /* 16px */
+  --section-space: 4rem; /* 64px */
+}
+
+@media (width >= 48rem) {
+  :root {
+    --grid-margin: 2.5rem; /* 40px */
+    --grid-gutter: 1.5rem; /* 24px */
+    --section-space: 5rem; /* 80px */
+  }
+}
+
+@media (width >= 80rem) {
+  :root {
+    --grid-margin: 7.5rem; /* 120px */
+    --grid-gutter: 2.5rem; /* 40px */
+    --section-space: 7.5rem; /* 120px */
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. Base styles
+   -------------------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    font-size: var(--text-body-m);
+    line-height: var(--text-body-m--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-foreground);
+  }
+
+  ::selection {
+    background-color: var(--color-secondary-500);
+    color: var(--color-neutral-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary-600);
+    outline-offset: 2px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. Typography presets (family + size + line-height + weight)
+   Large headings scale down fluidly on small screens and hit the exact
+   design size at desktop.
+   -------------------------------------------------------------------------- */
+@utility heading-l {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 1.5rem + 4vw, var(--text-heading-l));
+  line-height: var(--text-heading-l--line-height);
+  font-weight: var(--text-heading-l--font-weight);
+}
+@utility heading-m {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 1.5rem + 2vw, var(--text-heading-m));
+  line-height: var(--text-heading-m--line-height);
+  font-weight: var(--text-heading-m--font-weight);
+}
+@utility heading-s {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, var(--text-heading-s));
+  line-height: var(--text-heading-s--line-height);
+  font-weight: var(--text-heading-s--font-weight);
+}
+@utility heading-xs {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading-xs);
+  line-height: var(--text-heading-xs--line-height);
+  font-weight: var(--text-heading-xs--font-weight);
+}
+
+@utility body-l {
+  font-family: var(--font-body);
+  font-size: var(--text-body-l);
+  line-height: var(--text-body-l--line-height);
+  font-weight: 400;
+}
+@utility body-m {
+  font-family: var(--font-body);
+  font-size: var(--text-body-m);
+  line-height: var(--text-body-m--line-height);
+  font-weight: 400;
+}
+@utility body-s {
+  font-family: var(--font-body);
+  font-size: var(--text-body-s);
+  line-height: var(--text-body-s--line-height);
+  font-weight: 400;
+}
+@utility body-xs {
+  font-family: var(--font-body);
+  font-size: var(--text-body-xs);
+  line-height: var(--text-body-xs--line-height);
+  font-weight: 400;
+}
+
+@utility label-l {
+  font-family: var(--font-body);
+  font-size: var(--text-label-l);
+  line-height: var(--text-label-l--line-height);
+  font-weight: var(--text-label-l--font-weight);
+}
+@utility label-m {
+  font-family: var(--font-body);
+  font-size: var(--text-label-m);
+  line-height: var(--text-label-m--line-height);
+  font-weight: var(--text-label-m--font-weight);
+}
+@utility label-s {
+  font-family: var(--font-body);
+  font-size: var(--text-label-s);
+  line-height: var(--text-label-s--line-height);
+  font-weight: var(--text-label-s--font-weight);
+}
+@utility label-xs {
+  font-family: var(--font-body);
+  font-size: var(--text-label-xs);
+  line-height: var(--text-label-xs--line-height);
+  font-weight: var(--text-label-xs--font-weight);
+}
+
+/* --------------------------------------------------------------------------
+   8. Layout utilities
+   -------------------------------------------------------------------------- */
+
+/* Page container: 1200px content + responsive side margin (120px desktop) */
+@utility container-site {
+  width: 100%;
+  max-width: calc(var(--container-site) + var(--grid-margin) * 2);
+  margin-inline: auto;
+  padding-inline: var(--grid-margin);
+}
+
+/* 12-column grid with responsive gutter (40px desktop). Use col-span-* on children. */
+@utility grid-site {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+}
+
+/* Vertical rhythm between landing page sections */
+@utility section-y {
+  padding-block: var(--section-space);
+}
+
+/* Blue hero / CTA backgrounds with subtle grid lines */
+@utility bg-grid-lines {
+  background-color: var(--color-primary-600);
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.08) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
