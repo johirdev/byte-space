@@ -2,6 +2,7 @@ import { CourseModel } from "../models/course.model";
 import type { CreatorProfile, CreatorSummary } from "../types";
 import { ApiError } from "../lib/apiError";
 import { slugify } from "../lib/validate";
+import { findVerifiedBySlug } from "./verifiedCreator.service";
 
 /**
  * Creators aren't a separate collection — a creator is whoever the admin
@@ -70,19 +71,27 @@ export async function listCreators(): Promise<CreatorSummary[]> {
   return rows.map(toSummary).sort((a, b) => b.stats.students - a.stats.students);
 }
 
-/** Exact creator name for a slug, or null. */
+/** Exact creator name for a slug, or null. Verified creators win. */
 export async function creatorNameForSlug(slug: string): Promise<string | null> {
   const key = slugify(slug);
   if (!key) return null;
+  const verified = await findVerifiedBySlug(key);
+  if (verified) return verified.name;
   const names = await CourseModel.distinct("creator.name", { status: "published" });
   return (names as string[]).find((name) => name && slugify(name) === key) ?? null;
 }
 
 export async function getCreator(slug: string): Promise<CreatorProfile> {
-  const name = await creatorNameForSlug(slug);
+  const verified = await findVerifiedBySlug(slug);
+  const name = verified?.name ?? (await creatorNameForSlug(slug));
   if (!name) throw new ApiError(404, "Creator not found");
 
-  const row = (await aggregateCreators()).find((r) => r._id === name);
+  // A verified creator has a profile even before their first course.
+  const row: Row | undefined =
+    (await aggregateCreators()).find((r) => r._id === name) ??
+    (verified
+      ? { _id: name, title: "", avatar: "", bio: "", courses: 0, students: 0, reviews: 0, ratingSum: 0 }
+      : undefined);
   if (!row) throw new ApiError(404, "Creator not found");
 
   const categories = await CourseModel.aggregate<{ _id: string; name: string; slug: string; count: number }>([
@@ -94,5 +103,23 @@ export async function getCreator(slug: string): Promise<CreatorProfile> {
     { $sort: { count: -1 } },
   ]);
 
-  return { ...toSummary(row), categories: categories.map((c) => ({ name: c.name, slug: c.slug, count: c.count })) };
+  const summary = toSummary(row);
+  const profile: CreatorProfile = {
+    ...summary,
+    categories: categories.map((c) => ({ name: c.name, slug: c.slug, count: c.count })),
+  };
+  if (!verified) return profile;
+
+  return {
+    ...profile,
+    slug: verified.slug,
+    title: verified.title || summary.title,
+    avatar: verified.avatar || summary.avatar,
+    bio: verified.bio || summary.bio,
+    verified: true,
+    linkedin: verified.linkedin ?? "",
+    website: verified.website ?? "",
+    expertise: verified.expertise ?? [],
+    followers: verified.followers ? verified.followers : summary.followers,
+  };
 }

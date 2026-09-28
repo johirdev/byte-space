@@ -371,9 +371,9 @@ function Chip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`h-10 cursor-pointer rounded-full px-4 text-sm whitespace-nowrap transition-colors ${
+      className={`h-10 cursor-pointer rounded-full font-medium px-4 text-sm whitespace-nowrap transition-colors ${
         active
-          ? "bg-secondary-400 font-medium text-neutral-950"
+          ? "bg-secondary-400  text-neutral-950"
           : "bg-neutral-50 text-neutral-700 hover:bg-neutral-100"
       }`}
     >

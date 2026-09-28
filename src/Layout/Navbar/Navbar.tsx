@@ -23,6 +23,16 @@ const ACCOUNT_LINKS = [
   { label: "Settings", href: "/profile?tab=settings", icon: Settings },
 ];
 
+/** Verified creators have no learner tabs — their profile is their courses. */
+const accountLinksFor = (user: { creator: { slug: string } | null } | null) =>
+  user?.creator
+    ? [
+        { label: "My creator profile", href: "/profile", icon: UserRound },
+        { label: "Public profile", href: `/creator-profile/${user.creator.slug}`, icon: BookOpen },
+        { label: "Settings", href: "/profile?tab=settings", icon: Settings },
+      ]
+    : ACCOUNT_LINKS;
+
 const BagIcon = () => (
   <svg
     width="24"
@@ -113,7 +123,7 @@ function AccountMenu() {
             </span>
           </div>
           <div className="my-1 border-t border-neutral-100" />
-          {ACCOUNT_LINKS.map((link) => (
+          {accountLinksFor(user).map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -258,7 +268,7 @@ const Navbar = () => {
               </Link>
             )}
             <ul className="flex flex-col">
-              {[...navLinks, ...(user ? ACCOUNT_LINKS.slice(1) : [])].map((link) => (
+              {[...navLinks, ...(user ? accountLinksFor(user).slice(1) : [])].map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}

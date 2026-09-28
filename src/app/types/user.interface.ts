@@ -35,6 +35,8 @@ export type SafeUser = Omit<IUser, "password" | "login_attempts" | "lock_until">
 export type SessionUser = SafeUser & {
   enrolled_course_ids: string[];
   stats: { courses: number; reviews: number; orders: number; spent: number };
+  /** Set only while the user is an active verified creator. */
+  creator: { slug: string; code: string } | null;
 };
 
 /** Frozen copy of the buyer on orders and enrollments. */

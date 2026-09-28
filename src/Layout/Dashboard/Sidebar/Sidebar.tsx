@@ -5,7 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
+  BadgeCheck,
   BookOpen,
+  Inbox,
   ExternalLink,
   FolderTree,
   GraduationCap,
@@ -46,6 +48,13 @@ const NAV: NavGroup[] = [
       { label: "Add course", href: "/dashboard/courses/create", icon: Plus, roles: CONTENT_EDITORS },
       { label: "Categories", href: "/dashboard/course-categories", icon: FolderTree },
       { label: "Reviews", href: "/dashboard/course-reviews", icon: MessageSquareQuote },
+    ],
+  },
+  {
+    title: "Creators",
+    items: [
+      { label: "Creator requests", href: "/dashboard/creator-requests", icon: Inbox },
+      { label: "Verified creators", href: "/dashboard/creators", icon: BadgeCheck },
     ],
   },
   {

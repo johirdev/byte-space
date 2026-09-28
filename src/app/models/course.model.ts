@@ -28,6 +28,9 @@ const ModuleSchema = new Schema(
 
 const CreatorSchema = new Schema(
   {
+    // Verified creator this course belongs to; name/title/avatar/bio below are
+    // a snapshot of that record (kept in sync when the creator is edited).
+    creator_id: { type: Schema.Types.ObjectId, ref: "verified_creators", default: null, index: true },
     name: { type: String, trim: true, default: "" },
     title: { type: String, trim: true, default: "" },
     avatar: { type: String, trim: true, default: "" },

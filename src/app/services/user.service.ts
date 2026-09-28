@@ -5,6 +5,7 @@ import { EnrollmentModel } from "../models/enrollment.model";
 import { OrderModel } from "../models/order.model";
 import { CourseReviewModel } from "../models/courseReview.model";
 import { CourseModel } from "../models/course.model";
+import { VerifiedCreatorModel } from "../models/verifiedCreator.model";
 import type { IEnrollment, IOrder, IUser, SafeUser, SessionUser } from "../types";
 import { ApiError } from "../lib/apiError";
 import { buildMeta, type ResponseMeta } from "../lib/sendResponse";
@@ -132,17 +133,19 @@ export async function getSessionUser(id: string): Promise<SessionUser> {
   const user = await getActiveUser(id);
   const userId = new Types.ObjectId(id);
 
-  const [enrollments, reviews, orderAgg] = await Promise.all([
+  const [enrollments, reviews, orderAgg, creator] = await Promise.all([
     EnrollmentModel.find({ user: userId }).select("course").lean<{ course: Types.ObjectId }[]>(),
     CourseReviewModel.countDocuments({ user: userId }),
     OrderModel.aggregate<{ count: number; spent: number }>([
       { $match: { user: userId, status: "paid" } },
       { $group: { _id: null, count: { $sum: 1 }, spent: { $sum: "$total" } } },
     ]),
+    VerifiedCreatorModel.findOne({ user: userId, is_active: true }).select("slug code").lean<{ slug: string; code: string }>(),
   ]);
 
   return {
     ...user,
+    creator: creator ? { slug: creator.slug, code: creator.code } : null,
     enrolled_course_ids: enrollments.map((e) => String(e.course)),
     stats: {
       courses: enrollments.length,

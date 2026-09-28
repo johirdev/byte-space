@@ -33,6 +33,7 @@ import {
 } from "../lib/validate";
 import { findCategory } from "./courseCategory.service";
 import { creatorNameForSlug } from "./creator.service";
+import { courseCreatorFromId } from "./verifiedCreator.service";
 
 type CourseRow = ICourse & { _id: string };
 
@@ -234,15 +235,26 @@ const buildPayload = async (
 
   if (has("creator")) {
     const raw = asRecord(body.creator);
-    const creator: ICourseCreator = {
-      name: str(raw.name) ?? "",
-      title: str(raw.title) ?? "",
-      avatar: str(raw.avatar) ?? "",
-      bio: str(raw.bio) ?? "",
-    };
-    check.require("creator.name", creator.name, "Creator name");
-    check.url("creator.avatar", creator.avatar);
-    out.creator = creator;
+    const creatorId = str(raw.creator_id);
+
+    if (creatorId) {
+      // Linked to a verified creator: the record is the source of truth,
+      // whatever name/avatar the client sent is ignored.
+      const linked = await courseCreatorFromId(creatorId);
+      check.custom("creator.creator_id", Boolean(linked), "That creator is no longer verified — pick another");
+      if (linked) out.creator = linked;
+    } else {
+      const creator: ICourseCreator = {
+        creator_id: null,
+        name: str(raw.name) ?? "",
+        title: str(raw.title) ?? "",
+        avatar: str(raw.avatar) ?? "",
+        bio: str(raw.bio) ?? "",
+      };
+      check.require("creator.name", creator.name, "Creator name");
+      check.url("creator.avatar", creator.avatar);
+      out.creator = creator;
+    }
   }
 
   if (has("students_count")) {

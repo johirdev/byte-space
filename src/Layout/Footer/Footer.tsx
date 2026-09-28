@@ -20,7 +20,7 @@ const COLUMNS = [
     { label: "Sport", href: "/courses?q=sport" },
   ],
   [
-    { label: "Become a Creator", href: "#" },
+    { label: "Become a Creator", href: "/become-creator" },
     { label: "Affiliate Program", href: "#" },
     { label: "Contact", href: "#" },
     { label: "Help", href: "#" },

@@ -172,7 +172,7 @@ const UnlockPotential = () => {
             </m.p>
             <m.div variants={fadeUp} className="mt-8 md:mt-10">
               <Link
-                href="/register?next=/creator-profile"
+                href="/become-creator"
                 className="group inline-flex h-[46px] items-center rounded-full bg-secondary-400 px-6 text-lg font-medium text-neutral-950 shadow-[0_10px_30px_-10px_rgb(203_252_1/0.7)] transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-secondary-300 focus-visible:ring-4 focus-visible:ring-white/60 focus-visible:outline-none"
               >
                 Join as Creator

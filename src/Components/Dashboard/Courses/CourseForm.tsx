@@ -39,6 +39,7 @@ import { Field } from "../kit/Fields";
 import { ImageUpload, MultiImageUpload } from "../kit/ImageUpload";
 import CurriculumBuilder from "./CurriculumBuilder";
 import ListEditor from "./ListEditor";
+import CreatorPicker from "./CreatorPicker";
 
 type FormState = Omit<CourseFormValues, "price" | "students_count"> & {
   price: number | "";
@@ -64,7 +65,7 @@ const EMPTY: FormState = {
   lesson_content_info: "",
   progress_info: "",
   modules: [],
-  creator: { name: "", title: "", avatar: "", bio: "" },
+  creator: { creator_id: null, name: "", title: "", avatar: "", bio: "" },
   students_count: 0,
   tags: [],
   is_featured: false,
@@ -191,7 +192,7 @@ export default function CourseForm({ courseId }: { courseId?: string }) {
   };
   const setCreator = (patch: Partial<FormState["creator"]>) => {
     setValues((prev) => ({ ...prev, creator: { ...prev.creator, ...patch } }));
-    setErrors((prev) => omit(prev, ["creator.name", "creator.avatar"]));
+    setErrors((prev) => omit(prev, ["creator.name", "creator.avatar", "creator.creator_id"]));
   };
 
   const register = (id: SectionId, el: HTMLElement | null) => {
@@ -233,7 +234,10 @@ export default function CourseForm({ courseId }: { courseId?: string }) {
         status: prev.status,
         is_featured: prev.is_featured,
         students_count: prev.students_count,
-        creator: { ...prev.creator, ...data.creator, avatar: prev.creator.avatar },
+        // A linked verified creator is the source of truth — keep it as-is.
+        creator: prev.creator.creator_id
+          ? prev.creator
+          : { ...prev.creator, ...data.creator, avatar: prev.creator.avatar },
       }));
       setErrors({});
       setGlow((g) => g + 1);
@@ -709,20 +713,34 @@ export default function CourseForm({ courseId }: { courseId?: string }) {
 
           {/* Creator */}
           <Section id="creator" register={register} icon={UserRound} title="Creator" sub="Shown under the title and in the side card." glow={glow}>
-            <div className="grid gap-4 sm:grid-cols-[180px_1fr]">
-              <div className="a-field">
-                <span className="a-label">Avatar</span>
-                <ImageUpload value={values.creator.avatar ?? ""} onChange={(url) => setCreator({ avatar: url })} aspect="1/1" hint="Square image" invalid={Boolean(errors["creator.avatar"])} />
-                {errors["creator.avatar"] && <p className="a-error">{errors["creator.avatar"]}</p>}
-              </div>
-              <div className="flex flex-col gap-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <TextField id="creator_name" label="Name" required value={values.creator.name} error={errors["creator.name"]} disabled={disabled} placeholder="PurePearl Studio" onChange={(v) => setCreator({ name: v })} />
-                  <TextField id="creator_title" label="Title" value={values.creator.title ?? ""} disabled={disabled} placeholder="Professional Creator" onChange={(v) => setCreator({ title: v })} />
-                </div>
-                <TextArea id="creator_bio" label="Short pitch" value={values.creator.bio ?? ""} disabled={disabled} placeholder="Ready to Dive In? Enroll Now and Start Building Your Digital Future!" onChange={(v) => setCreator({ bio: v })} />
-              </div>
+            <div className="mb-5">
+              <CreatorPicker
+                linked={values.creator}
+                disabled={disabled}
+                error={errors["creator.creator_id"]}
+                onSelect={(c) =>
+                  setCreator({ creator_id: String(c._id), name: c.name, title: c.title ?? "", avatar: c.avatar ?? "", bio: c.bio ?? "" })
+                }
+                onUnlink={() => setCreator({ creator_id: null })}
+              />
             </div>
+            {/* Linked creators are read-only here — edit them under Verified creators. */}
+            <fieldset disabled={disabled || Boolean(values.creator.creator_id)} className={values.creator.creator_id ? "opacity-60" : ""}>
+              <div className="grid gap-4 sm:grid-cols-[180px_1fr]">
+                <div className="a-field">
+                  <span className="a-label">Avatar</span>
+                  <ImageUpload value={values.creator.avatar ?? ""} onChange={(url) => setCreator({ avatar: url })} aspect="1/1" hint="Square image" invalid={Boolean(errors["creator.avatar"])} />
+                  {errors["creator.avatar"] && <p className="a-error">{errors["creator.avatar"]}</p>}
+                </div>
+                <div className="flex flex-col gap-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <TextField id="creator_name" label="Name" required value={values.creator.name} error={errors["creator.name"]} disabled={disabled || Boolean(values.creator.creator_id)} placeholder="PurePearl Studio" onChange={(v) => setCreator({ name: v })} />
+                    <TextField id="creator_title" label="Title" value={values.creator.title ?? ""} disabled={disabled || Boolean(values.creator.creator_id)} placeholder="Professional Creator" onChange={(v) => setCreator({ title: v })} />
+                  </div>
+                  <TextArea id="creator_bio" label="Short pitch" value={values.creator.bio ?? ""} disabled={disabled || Boolean(values.creator.creator_id)} placeholder="Ready to Dive In? Enroll Now and Start Building Your Digital Future!" onChange={(v) => setCreator({ bio: v })} />
+                </div>
+              </div>
+            </fieldset>
           </Section>
         </div>
 

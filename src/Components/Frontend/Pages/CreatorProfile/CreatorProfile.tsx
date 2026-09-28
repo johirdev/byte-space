@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { BarChart3, Filter, ListFilter, SearchX, Shapes, Star, UserRoundX } from "lucide-react";
+import { BadgeCheck, BarChart3, Filter, Globe, ListFilter, SearchX, Shapes, Star, UserRoundX } from "lucide-react";
 import { apiRequest, ApiClientError } from "@/app/lib/apiClient";
 import {
   COURSE_LEVELS,
@@ -25,7 +25,20 @@ const PAGE_SIZE = 9;
 type Filters = { level: string; category: string; sort: string; price: string; rating: string; page: number };
 const EMPTY: Filters = { level: "", category: "", sort: "relevant", price: "", rating: "", page: 1 };
 
-export default function CreatorProfile({ slug }: { slug: string }) {
+export default function CreatorProfile({
+  slug,
+  ownerActions,
+  belowHero,
+  coursesTitle,
+}: {
+  slug: string;
+  /** Shown instead of Follow when a creator views their own profile. */
+  ownerActions?: ReactNode;
+  /** Extra panel between the hero and the course grid (e.g. account settings). */
+  belowHero?: ReactNode;
+  /** Optional heading above the course filters. */
+  coursesTitle?: string;
+}) {
   const [creator, setCreator] = useState<Creator | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -140,7 +153,13 @@ export default function CreatorProfile({ slug }: { slug: string }) {
                 <div className="min-w-0">
                   <h1 className="flex flex-wrap items-center gap-3 font-heading text-[clamp(1.75rem,1.2rem+1.6vw,2.25rem)] leading-tight font-semibold text-white">
                     {creator.name}
-                    <span className="rounded-full bg-secondary-400 px-5 py-1 font-body text-base font-medium text-neutral-950">Creator</span>
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full bg-secondary-400 px-5 py-1 font-body text-base font-medium text-neutral-950"
+                      title={creator.verified ? "Verified by ByteSpace" : undefined}
+                    >
+                      {creator.verified && <BadgeCheck className="size-4" aria-label="Verified" />}
+                      Creator
+                    </span>
                   </h1>
                   {creator.title && <p className="mt-2 text-lg text-white">{creator.title}</p>}
                 </div>
@@ -163,6 +182,26 @@ export default function CreatorProfile({ slug }: { slug: string }) {
                 )}
               </div>
 
+              {(creator.expertise?.length || creator.linkedin || creator.website) && (
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                  {creator.expertise?.map((topic) => (
+                    <span key={topic} className="rounded-full bg-white/15 px-3 py-1 text-sm text-white">
+                      {topic}
+                    </span>
+                  ))}
+                  {creator.linkedin && (
+                    <a href={creator.linkedin} target="_blank" rel="noopener noreferrer" className="rounded-full border border-white/40 px-3 py-1 text-sm text-white hover:bg-white/15">
+                      LinkedIn ↗
+                    </a>
+                  )}
+                  {creator.website && (
+                    <a href={creator.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-white/40 px-3 py-1 text-sm text-white hover:bg-white/15">
+                      <Globe className="size-3.5" /> Website ↗
+                    </a>
+                  )}
+                </div>
+              )}
+
               <div className="mt-8 flex flex-wrap items-center justify-between gap-4 md:mt-10">
                 <ul className="flex flex-wrap gap-3 md:gap-4">
                   <Pill value={creator.stats.courses} label={creator.stats.courses === 1 ? "Product" : "Products"} />
@@ -176,15 +215,23 @@ export default function CreatorProfile({ slug }: { slug: string }) {
                     </li>
                   )}
                 </ul>
-                <FollowButton slug={slug} name={first ?? creator.name} />
+                {ownerActions ?? <FollowButton slug={slug} name={first ?? creator.name} />}
               </div>
             </>
           )}
         </div>
       </section>
 
+      {belowHero}
+
       {/* ── Courses ──────────────────────────────────────── */}
       <section ref={gridRef} className="container-site scroll-mt-4 pt-10 pb-16 md:pt-[58px] md:pb-[120px]">
+        {coursesTitle && (
+          <h2 className="mb-6 font-heading text-2xl font-semibold text-neutral-950 md:mb-8">
+            {coursesTitle}
+            {meta && <span className="ml-2 text-base font-normal text-neutral-500">({meta.total})</span>}
+          </h2>
+        )}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <Dropdown label={extra ? `Filter (${extra})` : "Filter"} value={extra ? "on" : ""} icon={<Filter className="size-4" />}>

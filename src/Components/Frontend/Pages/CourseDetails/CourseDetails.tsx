@@ -102,26 +102,41 @@ export default function CourseDetails({ slug }: { slug: string }) {
               {course.title}
             </h1>
             {course.subtitle && (
-              <p className="mt-1 font-heading text-base font-semibold text-white md:text-lg">{course.subtitle}</p>
+              <p className="mt-1 font-heading text-base font-semibold text-white md:text-lg">
+                {course.subtitle}
+              </p>
             )}
             <p className="mt-4 text-base text-white">
               by{" "}
-              <Link href={creatorHref(course.creator?.name)} className="text-secondary-400 hover:underline">
+              <Link
+                href={creatorHref(course.creator?.name)}
+                className="text-secondary-400 hover:underline"
+              >
                 {course.creator?.name}
               </Link>
             </p>
 
             <ul className="mt-4 flex flex-wrap gap-3">
               <HeroPill>
-                <LevelIcon level={course.level} className="size-3.5 text-primary-600" />
+                <LevelIcon
+                  level={course.level}
+                  className="size-3.5 text-primary-600"
+                />
                 {course.level}
               </HeroPill>
               <HeroPill>
-                <Star className="size-4 fill-primary-600 text-primary-600" aria-hidden="true" />
-                {course.rating_avg ? course.rating_avg.toFixed(1) : "New"} ({course.rating_count} reviews)
+                <Star
+                  className="size-4 fill-primary-600 text-primary-600"
+                  aria-hidden="true"
+                />
+                {course.rating_avg ? course.rating_avg.toFixed(1) : "New"} (
+                {course.rating_count} reviews)
               </HeroPill>
               <HeroPill>
-                <UsersRound className="size-4 text-primary-600" aria-hidden="true" />
+                <UsersRound
+                  className="size-4 text-primary-600"
+                  aria-hidden="true"
+                />
                 {course.students_count} Students
               </HeroPill>
             </ul>
@@ -132,14 +147,22 @@ export default function CourseDetails({ slug }: { slug: string }) {
             onClick={share}
             className="inline-flex h-10 shrink-0 cursor-pointer items-center gap-2 self-end rounded-full bg-secondary-400 px-6 text-sm font-medium text-neutral-950 transition-colors hover:bg-secondary-300 sm:self-auto xl:-mr-[62px]"
           >
-            {shared ? <Check className="size-4" aria-hidden="true" /> : <Share2 className="size-4" aria-hidden="true" />}
+            {shared ? (
+              <Check className="size-4" aria-hidden="true" />
+            ) : (
+              <Share2 className="size-4" aria-hidden="true" />
+            )}
             {shared ? "Link copied" : "Share"}
           </button>
         </header>
 
         {/* ── Video ────────────────────────────────────────── */}
         <div className="col-[1/-1] row-start-2 pb-8 md:pb-[62px] lg:col-[1/span_7]">
-          <CourseVideo thumbnail={course.thumbnail} video={course.preview_video} title={course.title} />
+          <CourseVideo
+            thumbnail={course.thumbnail}
+            video={course.preview_video}
+            title={course.title}
+          />
         </div>
 
         {/* ── Side card (spans into the white area on desktop) ── */}
@@ -149,7 +172,11 @@ export default function CourseDetails({ slug }: { slug: string }) {
 
         {/* ── Tabs ─────────────────────────────────────────── */}
         <div className="col-[1/-1] row-start-4 pt-10 pb-16 md:pt-[62px] md:pb-[120px] lg:col-[1/span_7] lg:row-start-3">
-          <div role="tablist" aria-label="Course sections" className="flex gap-3">
+          <div
+            role="tablist"
+            aria-label="Course sections"
+            className="flex gap-3"
+          >
             {TABS.map((t) => (
               <button
                 key={t.id}
@@ -159,9 +186,9 @@ export default function CourseDetails({ slug }: { slug: string }) {
                 aria-selected={tab === t.id}
                 aria-controls={`panel-${t.id}`}
                 onClick={() => selectTab(t.id)}
-                className={`h-10 cursor-pointer rounded-full px-4 text-sm transition-colors ${
+                className={`h-10 cursor-pointer rounded-full font-medium px-4 text-sm transition-colors ${
                   tab === t.id
-                    ? "bg-secondary-400 font-medium text-neutral-950"
+                    ? "bg-secondary-400  text-neutral-950"
                     : "bg-neutral-50 text-neutral-700 hover:bg-neutral-100"
                 }`}
               >
@@ -170,7 +197,12 @@ export default function CourseDetails({ slug }: { slug: string }) {
             ))}
           </div>
 
-          <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="mt-8 md:mt-10">
+          <div
+            role="tabpanel"
+            id={`panel-${tab}`}
+            aria-labelledby={`tab-${tab}`}
+            className="mt-8 md:mt-10"
+          >
             {tab === "about" && <AboutTab course={course} />}
             {tab === "lessons" && <LessonsTab course={course} />}
             {tab === "reviews" && <ReviewsTab course={course} />}

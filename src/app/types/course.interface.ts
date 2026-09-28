@@ -81,6 +81,8 @@ export type ICourseModule = {
 };
 
 export type ICourseCreator = {
+  /** Verified creator this course belongs to (see creator-application flow). */
+  creator_id?: string | null;
   name: string;
   title?: string;
   avatar?: string;
@@ -186,10 +188,85 @@ export type CreatorSummary = {
   avatar: string;
   bio: string;
   stats: { courses: number; students: number; reviews: number; rating: number };
+  /** Set when the creator passed the application review. */
+  verified?: boolean;
+  linkedin?: string;
+  website?: string;
+  expertise?: string[];
   /** Demo count (no follow system yet) — stable per creator. */
   followers: number;
 };
 
 export type CreatorProfile = CreatorSummary & {
   categories: { name: string; slug: string; count: number }[];
+};
+
+/* ── Creator applications & verified creators ────────────────────────── */
+export const APPLICATION_STATUSES = ["pending", "approved", "rejected"] as const;
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
+/** Minutes a user must wait between two applications. */
+export const APPLICATION_COOLDOWN_MINUTES = 5;
+
+/** Fields an applicant fills in — shared by the form and the API. */
+export type CreatorApplicationInput = {
+  name: string;
+  email: string;
+  phone: string;
+  avatar: string;
+  designation: string;
+  bio: string;
+  experience_years: number;
+  expertise: string[];
+  linkedin: string;
+  website?: string;
+  followers?: number;
+  teaching_plan: string;
+};
+
+export type ICreatorApplication = CreatorApplicationInput & {
+  _id?: string;
+  user: string;
+  status: ApplicationStatus;
+  admin_note?: string;
+  reviewed_by?: { id: string; name: string } | null;
+  reviewed_at?: string | Date | null;
+  creator?: string | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+};
+
+export type IVerifiedCreator = {
+  _id?: string;
+  /** Human-friendly id admins search by, e.g. "CR-7F3A2". */
+  code: string;
+  slug: string;
+  user?: string | null;
+  application?: string | null;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  title?: string;
+  bio?: string;
+  linkedin?: string;
+  website?: string;
+  experience_years?: number;
+  expertise?: string[];
+  followers?: number;
+  is_active: boolean;
+  verified_at?: string | Date;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  /** Computed on list reads. */
+  course_count?: number;
+};
+
+/** GET /creator-applications/me */
+export type MyCreatorStatus = {
+  creator: IVerifiedCreator | null;
+  latest: ICreatorApplication | null;
+  history: ICreatorApplication[];
+  /** ISO time the next application is allowed, or null when allowed now. */
+  next_allowed_at: string | null;
 };

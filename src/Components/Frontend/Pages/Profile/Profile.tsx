@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, MessageSquareText, PartyPopper, Receipt, Settings, X } from "lucide-react";
+import { BadgeCheck, BookOpen, ExternalLink, MessageSquareText, PartyPopper, Receipt, Settings, X } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import type { SessionUser } from "@/app/types";
+import CreatorProfile from "../CreatorProfile/CreatorProfile";
 import AvatarUploader from "./AvatarUploader";
 import MyCourses from "./MyCourses";
 import MyOrders from "./MyOrders";
@@ -59,6 +61,11 @@ export default function Profile({ initialTab, newOrder }: { initialTab: ProfileT
         </section>
       </main>
     );
+  }
+
+  // Verified creators get the creator layout: their profile + their courses only.
+  if (user.creator) {
+    return <CreatorOwnProfile user={user} initialSettings={initialTab === "settings"} />;
   }
 
   const first = user.name.split(" ")[0];
@@ -174,5 +181,59 @@ export default function Profile({ initialTab, newOrder }: { initialTab: ProfileT
         </div>
       </section>
     </main>
+  );
+}
+
+/** A verified creator's own /profile: the public creator layout + owner actions. */
+function CreatorOwnProfile({ user, initialSettings }: { user: SessionUser; initialSettings: boolean }) {
+  const [showSettings, setShowSettings] = useState(initialSettings);
+  const creator = user.creator!;
+
+  const toggleSettings = () => {
+    const next = !showSettings;
+    setShowSettings(next);
+    const url = new URL(window.location.href);
+    if (next) url.searchParams.set("tab", "settings");
+    else url.searchParams.delete("tab");
+    window.history.replaceState(null, "", url);
+  };
+
+  return (
+    <CreatorProfile
+      slug={creator.slug}
+      coursesTitle="My courses"
+      ownerActions={
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex h-11 items-center gap-1.5 rounded-full border border-white/40 px-4 font-mono text-sm text-white" title="Your Creator ID">
+            <BadgeCheck className="size-4" /> {creator.code}
+          </span>
+          <Link
+            href={`/creator-profile/${creator.slug}`}
+            className="inline-flex h-11 items-center gap-2 rounded-full border border-white/70 px-5 text-base text-white transition-colors hover:bg-white/15"
+          >
+            <ExternalLink className="size-4" /> Public profile
+          </Link>
+          <button
+            type="button"
+            onClick={toggleSettings}
+            aria-expanded={showSettings}
+            className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-secondary-400 px-6 text-lg font-medium text-neutral-950 transition-colors hover:bg-secondary-300"
+          >
+            <Settings className="size-5" /> {showSettings ? "Close settings" : "Account settings"}
+          </button>
+        </div>
+      }
+      belowHero={
+        showSettings ? (
+          <section className="container-site pt-10 md:pt-14" aria-label="Account settings">
+            <p className="mb-6 rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
+              Your photo and password live here. Your public creator details (bio, designation, links) are managed by the
+              ByteSpace team — contact them to change those.
+            </p>
+            <AccountSettings user={user} />
+          </section>
+        ) : null
+      }
+    />
   );
 }
