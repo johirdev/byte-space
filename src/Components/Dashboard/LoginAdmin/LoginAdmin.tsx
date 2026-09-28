@@ -182,7 +182,7 @@ export default function LoginAdmin() {
                   value={form.admin_name}
                   onChange={set("admin_name")}
                   error={errors.admin_name}
-                  placeholder="Anamul Hasan Nafi"
+                  placeholder="AnamulByteSpace"
                   autoComplete="name"
                 />
                 <TextField
@@ -230,8 +230,12 @@ export default function LoginAdmin() {
                   value={form.admin_password}
                   onChange={(e) => set("admin_password")(e.target.value)}
                   aria-invalid={Boolean(errors.admin_password)}
-                  autoComplete={isBootstrap ? "new-password" : "current-password"}
-                  placeholder={isBootstrap ? "At least 8 characters" : "••••••••"}
+                  autoComplete={
+                    isBootstrap ? "new-password" : "current-password"
+                  }
+                  placeholder={
+                    isBootstrap ? "At least 8 characters" : "••••••••"
+                  }
                 />
                 <button
                   type="button"
@@ -276,8 +280,9 @@ export default function LoginAdmin() {
               className="mt-6 text-center text-[0.76rem] leading-relaxed"
               style={{ color: "var(--a-text-3)" }}
             >
-              Five failed attempts locks the account for an hour and blocks the IP for
-              six. Ask a superadmin to reset your password if that happens.
+              Five failed attempts locks the account for an hour and blocks the
+              IP for six. Ask a superadmin to reset your password if that
+              happens.
             </p>
           )}
         </div>

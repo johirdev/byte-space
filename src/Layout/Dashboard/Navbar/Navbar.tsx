@@ -50,28 +50,17 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
         borderBottom: "1px solid var(--a-line)",
       }}
     >
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onMenuToggle}
-          aria-label="Toggle navigation"
-          className="a-btn a-btn--ghost a-btn--icon lg:hidden"
-        >
-          <Menu size={18} />
-        </button>
-
-        <div className="hidden flex-col leading-tight sm:flex">
-          <span className="text-[0.86rem] font-semibold text-white">
-            {greeting()}, {adminData?.name?.split(" ")[0] ?? "there"}
-          </span>
-          <span className="text-[0.72rem]" style={{ color: "var(--a-text-3)" }}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            })}
-          </span>
-        </div>
+      <div className="flex  items-center gap-3">
+        <span className="md:hidden">
+          <button
+            type="button"
+            onClick={onMenuToggle}
+            aria-label="Toggle navigation"
+            className="a-btn a-btn--ghost a-btn--icon lg:hidden"
+          >
+            <Menu size={18} />
+          </button>
+        </span>
       </div>
 
       <div className="flex items-center gap-3">
@@ -97,7 +86,10 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
               <span className="text-[0.8rem] font-semibold text-white">
                 {adminData?.name}
               </span>
-              <span className="text-[0.7rem]" style={{ color: "var(--a-text-3)" }}>
+              <span
+                className="text-[0.7rem]"
+                style={{ color: "var(--a-text-3)" }}
+              >
                 {adminData?.email}
               </span>
             </span>
@@ -117,7 +109,10 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
                 <p className="text-[0.82rem] font-semibold text-white">
                   {adminData?.name}
                 </p>
-                <p className="text-[0.72rem]" style={{ color: "var(--a-text-3)" }}>
+                <p
+                  className="text-[0.72rem]"
+                  style={{ color: "var(--a-text-3)" }}
+                >
                   {adminData?.email}
                 </p>
               </div>

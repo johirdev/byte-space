@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { AuthContext } from "@/app/dashboard/AuthProvider";
 import type { AdminRole } from "@/app/types";
+import Image from "next/image";
 
 type NavItem = {
   label: string;
@@ -35,31 +36,22 @@ type NavGroup = { title: string; items: NavItem[] };
 const NAV: NavGroup[] = [
   {
     title: "Overview",
-    items: [
-      { label: "Dashboard", href: "/admins", icon: LayoutDashboard },
-      { label: "Leads", href: "/admins/leads", icon: Inbox },
-    ],
+    items: [{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
-    title: "Site content",
+    title: "Courses",
     items: [
-      { label: "Profile & hero", href: "/admins/profile", icon: UserRound },
-      { label: "Services", href: "/admins/services", icon: Layers },
-      { label: "Portfolio", href: "/admins/add-portfolio", icon: Briefcase },
-      { label: "Case studies", href: "/admins/case-studies", icon: ChartNoAxesCombined },
-      { label: "Pricing", href: "/admins/add-priceing", icon: Tag },
-      { label: "Testimonials", href: "/admins/reviews", icon: MessageSquareQuote },
-      { label: "FAQ", href: "/admins/faq", icon: HelpCircle },
-      { label: "Blog", href: "/admins/add-blog", icon: FileText },
+      { label: "Course", href: "/dashboard/course", icon: UserRound },
+      { label: "Services", href: "/dashboard/services", icon: Layers },
     ],
   },
   {
     title: "Account",
     items: [
-      { label: "My account", href: "/admins/account", icon: UserCog },
+      { label: "My account", href: "/dashboard/account", icon: UserCog },
       {
-        label: "Team",
-        href: "/admins/all-admin",
+        label: "Admin Management",
+        href: "/dashboard/all-admin",
         icon: UserRound,
         roles: ["superadmin"],
       },
@@ -79,7 +71,9 @@ export default function Sidebar({
   const role = adminData?.role;
 
   const isActive = (href: string) =>
-    href === "/admins" ? pathname === "/admins" : pathname.startsWith(href);
+    href === "/dashboard"
+      ? pathname === "/dashboard"
+      : pathname.startsWith(href);
 
   return (
     <>
@@ -108,18 +102,25 @@ export default function Sidebar({
           className="flex h-[var(--a-topbar-h)] shrink-0 items-center justify-between px-5"
           style={{ borderBottom: "1px solid var(--a-line)" }}
         >
-          <Link href="/admins" className="flex items-center gap-2.5">
-            <span
-              className="grid h-8 w-8 place-items-center rounded-[10px] font-heading text-[0.8rem] font-extrabold text-white"
-              style={{ background: "linear-gradient(135deg,#8f6dff,#6234e8)" }}
-            >
-              N
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <span className="grid h-8 w-8 place-items-center rounded-[10px] font-heading text-[0.8rem] font-extrabold text-white">
+              <Image
+                src="/logo.png"
+                alt=""
+                width={29}
+                height={32}
+                className="h-7 w-auto md:h-8"
+                preload
+              />
             </span>
             <span className="flex flex-col leading-none">
               <span className="font-heading text-[0.88rem] font-bold text-white">
-                Nafi Studio
+                Dashboard
               </span>
-              <span className="mt-0.5 text-[0.66rem]" style={{ color: "var(--a-text-3)" }}>
+              <span
+                className="mt-0.5 text-[0.66rem]"
+                style={{ color: "var(--a-text-3)" }}
+              >
                 Content manager
               </span>
             </span>
@@ -129,7 +130,7 @@ export default function Sidebar({
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="lg:hidden"
+            className="md:hidden"
             style={{ color: "var(--a-text-3)" }}
           >
             <X size={19} />
@@ -164,7 +165,9 @@ export default function Sidebar({
                           aria-current={active ? "page" : undefined}
                           className="group flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[0.845rem] font-medium transition-colors"
                           style={{
-                            background: active ? "var(--a-brand-tint)" : "transparent",
+                            background: active
+                              ? "var(--a-brand-tint)"
+                              : "transparent",
                             color: active ? "#fff" : "var(--a-text-2)",
                             boxShadow: active
                               ? "inset 0 0 0 1px rgba(124,92,255,.26)"
@@ -175,7 +178,9 @@ export default function Sidebar({
                             size={17}
                             strokeWidth={1.8}
                             style={{
-                              color: active ? "var(--a-brand)" : "var(--a-text-3)",
+                              color: active
+                                ? "var(--a-brand)"
+                                : "var(--a-text-3)",
                             }}
                           />
                           {item.label}
@@ -190,7 +195,10 @@ export default function Sidebar({
         </nav>
 
         {/* Footer link */}
-        <div className="px-3 pb-4" style={{ borderTop: "1px solid var(--a-line)" }}>
+        <div
+          className="px-3 pb-4"
+          style={{ borderTop: "1px solid var(--a-line)" }}
+        >
           <a
             href="/"
             target="_blank"
@@ -198,7 +206,11 @@ export default function Sidebar({
             className="mt-4 flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-[0.82rem] font-medium transition-colors hover:bg-[var(--a-panel-2)]"
             style={{ color: "var(--a-text-2)" }}
           >
-            <ExternalLink size={16} strokeWidth={1.8} style={{ color: "var(--a-text-3)" }} />
+            <ExternalLink
+              size={16}
+              strokeWidth={1.8}
+              style={{ color: "var(--a-text-3)" }}
+            />
             View live site
           </a>
         </div>
