@@ -64,6 +64,17 @@ export function optionalAuth(req: NextRequest): AccessTokenPayload | null {
 }
 
 /**
+ * True only when the caller explicitly asks for the admin view
+ * (`?scope=admin`) AND holds a valid panel token. Admins browsing the public
+ * site carry the cookie too, so the token alone must not unlock drafts.
+ */
+export function isAdminScope(req: NextRequest): boolean {
+  if (req.nextUrl.searchParams.get("scope") !== "admin") return false;
+  const user = optionalAuth(req);
+  return Boolean(user && PANEL_VIEWERS.includes(user.role));
+}
+
+/**
  * Legacy result-object API, kept so existing call sites keep compiling.
  * Prefer `requireAuth` in new code.
  */

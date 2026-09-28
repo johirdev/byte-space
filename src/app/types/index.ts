@@ -9,6 +9,24 @@ export type WithTimestamps = {
   updatedAt?: string | Date;
 };
 
+/* ── API envelope ────────────────────────────────────────────────────── */
+export type ApiMeta = {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type ApiResponse<T> = {
+  success: boolean;
+  message: string;
+  data?: T;
+  meta?: ApiMeta;
+  errors?: Record<string, string>;
+};
+
+export * from "./course.interface";
+
 /* ── Admin ───────────────────────────────────────────────────────────── */
 export const ADMIN_ROLES = [
   "superadmin",

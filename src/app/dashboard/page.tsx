@@ -1,7 +1,5 @@
+import Overview from "@/Components/Dashboard/Overview/Overview";
 
 export default function AdminDashboardPage() {
-  return <>
-  
-  <h1>Admin Dashboard</h1>
-  </>;
+  return <Overview />;
 }

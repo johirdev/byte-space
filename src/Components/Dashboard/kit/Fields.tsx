@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type KeyboardEvent } from "react";
-import Image from "next/image";
-import { ImageOff, Plus, X } from "lucide-react";
+import { ImageUpload } from "./ImageUpload";
+import { Plus, X } from "lucide-react";
 import type { FieldDef, FormValues, SimpleField } from "./types";
 
 type FieldProps = {
@@ -98,18 +98,12 @@ export function Field({ field, value, error, onChange }: FieldProps) {
       return (
         <div className="a-field">
           {label}
-          <div className="flex gap-3">
-            <ImagePreview src={typeof value === "string" ? value : ""} />
-            <input
-              id={id}
-              type="url"
-              className="a-input"
-              aria-invalid={invalid}
-              placeholder={field.placeholder ?? "https://…"}
-              value={typeof value === "string" ? value : ""}
-              onChange={(e) => onChange(e.target.value)}
-            />
-          </div>
+          <ImageUpload
+            value={typeof value === "string" ? value : ""}
+            onChange={onChange}
+            invalid={invalid}
+            compact
+          />
           {footer}
         </div>
       );
@@ -258,34 +252,6 @@ function TagsInput({
         </ul>
       )}
     </div>
-  );
-}
-
-/* ── Image preview ───────────────────────────────────────────────────── */
-function ImagePreview({ src }: { src: string }) {
-  const [failed, setFailed] = useState(false);
-  const usable = /^https?:\/\/|^\//.test(src) && !failed;
-
-  return (
-    <span
-      className="relative grid h-[42px] w-[56px] shrink-0 place-items-center overflow-hidden rounded-[9px] border"
-      style={{ borderColor: "var(--a-line)", background: "var(--a-panel-2)" }}
-      aria-hidden="true"
-    >
-      {usable ? (
-        <Image
-          src={src}
-          alt=""
-          fill
-          sizes="56px"
-          className="object-cover"
-          onError={() => setFailed(true)}
-          unoptimized
-        />
-      ) : (
-        <ImageOff size={16} style={{ color: "var(--a-text-3)" }} />
-      )}
-    </span>
   );
 }
 

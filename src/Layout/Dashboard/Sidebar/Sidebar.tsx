@@ -2,26 +2,24 @@
 
 import { useContext } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  Briefcase,
-  ChartNoAxesCombined,
+  BookOpen,
   ExternalLink,
-  FileText,
-  HelpCircle,
-  Inbox,
+  FolderTree,
   LayoutDashboard,
-  Layers,
+  LogOut,
   MessageSquareQuote,
-  Tag,
+  Plus,
+  ShieldCheck,
   UserCog,
-  UserRound,
   X,
   type LucideIcon,
 } from "lucide-react";
 import { AuthContext } from "@/app/dashboard/AuthProvider";
 import type { AdminRole } from "@/app/types";
-import Image from "next/image";
+import { CONTENT_EDITORS } from "@/app/lib/roles";
 
 type NavItem = {
   label: string;
@@ -41,8 +39,10 @@ const NAV: NavGroup[] = [
   {
     title: "Courses",
     items: [
-      { label: "Course", href: "/dashboard/course", icon: UserRound },
-      { label: "Services", href: "/dashboard/services", icon: Layers },
+      { label: "All courses", href: "/dashboard/courses", icon: BookOpen },
+      { label: "Add course", href: "/dashboard/courses/create", icon: Plus, roles: CONTENT_EDITORS },
+      { label: "Categories", href: "/dashboard/course-categories", icon: FolderTree },
+      { label: "Reviews", href: "/dashboard/course-reviews", icon: MessageSquareQuote },
     ],
   },
   {
@@ -50,14 +50,25 @@ const NAV: NavGroup[] = [
     items: [
       { label: "My account", href: "/dashboard/account", icon: UserCog },
       {
-        label: "Admin Management",
+        label: "Admin management",
         href: "/dashboard/all-admin",
-        icon: UserRound,
+        icon: ShieldCheck,
         roles: ["superadmin"],
       },
     ],
   },
 ];
+
+const ALL_HREFS = NAV.flatMap((g) => g.items.map((i) => i.href));
+
+/**
+ * The most specific nav entry that prefixes the current path wins, so
+ * /dashboard/courses/create highlights "Add course", not "All courses".
+ */
+const activeHref = (pathname: string) =>
+  ALL_HREFS.filter((href) =>
+    href === "/dashboard" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`),
+  ).sort((a, b) => b.length - a.length)[0];
 
 export default function Sidebar({
   isOpen,
@@ -67,13 +78,9 @@ export default function Sidebar({
   onClose: () => void;
 }) {
   const pathname = usePathname();
-  const { adminData } = useContext(AuthContext);
+  const { adminData, logOut } = useContext(AuthContext);
   const role = adminData?.role;
-
-  const isActive = (href: string) =>
-    href === "/dashboard"
-      ? pathname === "/dashboard"
-      : pathname.startsWith(href);
+  const current = activeHref(pathname);
 
   return (
     <>
@@ -93,7 +100,8 @@ export default function Sidebar({
         }`}
         style={{
           width: "var(--a-sidebar-w)",
-          background: "var(--a-surface)",
+          background:
+            "radial-gradient(120% 60% at 0% 0%, rgba(124,92,255,.10), transparent 60%), var(--a-surface)",
           borderRight: "1px solid var(--a-line)",
         }}
       >
@@ -102,26 +110,12 @@ export default function Sidebar({
           className="flex h-[var(--a-topbar-h)] shrink-0 items-center justify-between px-5"
           style={{ borderBottom: "1px solid var(--a-line)" }}
         >
-          <Link href="/dashboard" className="flex items-center gap-2.5">
-            <span className="grid h-8 w-8 place-items-center rounded-[10px] font-heading text-[0.8rem] font-extrabold text-white">
-              <Image
-                src="/logo.png"
-                alt=""
-                width={29}
-                height={32}
-                className="h-7 w-auto md:h-8"
-                preload
-              />
-            </span>
+          <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onClose}>
+            <Image src="/logo.png" alt="" width={26} height={29} className="h-7 w-auto" />
             <span className="flex flex-col leading-none">
-              <span className="font-heading text-[0.88rem] font-bold text-white">
-                Dashboard
-              </span>
-              <span
-                className="mt-0.5 text-[0.66rem]"
-                style={{ color: "var(--a-text-3)" }}
-              >
-                Content manager
+              <span className="font-heading text-[0.95rem] font-bold text-white">ByteSpace</span>
+              <span className="mt-1 text-[0.64rem] font-semibold tracking-[0.12em] uppercase" style={{ color: "var(--a-text-3)" }}>
+                Admin panel
               </span>
             </span>
           </Link>
@@ -130,10 +124,9 @@ export default function Sidebar({
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="md:hidden"
-            style={{ color: "var(--a-text-3)" }}
+            className="a-btn a-btn--ghost a-btn--icon lg:hidden"
           >
-            <X size={19} />
+            <X size={17} />
           </button>
         </div>
 
@@ -148,7 +141,7 @@ export default function Sidebar({
             return (
               <div key={group.title} className="mb-5 last:mb-0">
                 <p
-                  className="mb-2 px-3 text-[0.64rem] font-bold uppercase tracking-[0.14em]"
+                  className="mb-2 px-3 text-[0.64rem] font-bold tracking-[0.14em] uppercase"
                   style={{ color: "var(--a-text-3)" }}
                 >
                   {group.title}
@@ -156,32 +149,31 @@ export default function Sidebar({
 
                 <ul className="flex flex-col gap-0.5">
                   {items.map((item) => {
-                    const active = isActive(item.href);
+                    const active = item.href === current;
                     return (
                       <li key={item.href}>
                         <Link
                           href={item.href}
                           onClick={onClose}
                           aria-current={active ? "page" : undefined}
-                          className="group flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[0.845rem] font-medium transition-colors"
+                          className="group relative flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[0.845rem] font-medium transition-colors hover:bg-[var(--a-panel-2)]"
                           style={{
-                            background: active
-                              ? "var(--a-brand-tint)"
-                              : "transparent",
+                            background: active ? "var(--a-brand-tint)" : undefined,
                             color: active ? "#fff" : "var(--a-text-2)",
-                            boxShadow: active
-                              ? "inset 0 0 0 1px rgba(124,92,255,.26)"
-                              : undefined,
+                            boxShadow: active ? "inset 0 0 0 1px rgba(124,92,255,.26)" : undefined,
                           }}
                         >
+                          {active && (
+                            <span
+                              className="absolute top-1/2 -left-3 h-5 w-[3px] -translate-y-1/2 rounded-r-full"
+                              style={{ background: "var(--a-brand)" }}
+                              aria-hidden="true"
+                            />
+                          )}
                           <item.icon
                             size={17}
                             strokeWidth={1.8}
-                            style={{
-                              color: active
-                                ? "var(--a-brand)"
-                                : "var(--a-text-3)",
-                            }}
+                            style={{ color: active ? "var(--a-brand)" : "var(--a-text-3)" }}
                           />
                           {item.label}
                         </Link>
@@ -194,25 +186,44 @@ export default function Sidebar({
           })}
         </nav>
 
-        {/* Footer link */}
-        <div
-          className="px-3 pb-4"
-          style={{ borderTop: "1px solid var(--a-line)" }}
-        >
+        {/* Footer */}
+        <div className="flex flex-col gap-1 px-3 pt-3 pb-4" style={{ borderTop: "1px solid var(--a-line)" }}>
           <a
-            href="/"
+            href="/courses"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-[0.82rem] font-medium transition-colors hover:bg-[var(--a-panel-2)]"
+            className="flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-[0.82rem] font-medium transition-colors hover:bg-[var(--a-panel-2)]"
             style={{ color: "var(--a-text-2)" }}
           >
-            <ExternalLink
-              size={16}
-              strokeWidth={1.8}
-              style={{ color: "var(--a-text-3)" }}
-            />
-            View live site
+            <ExternalLink size={16} strokeWidth={1.8} style={{ color: "var(--a-text-3)" }} />
+            View live courses
           </a>
+
+          {adminData && (
+            <div className="mt-2 flex items-center gap-2.5 rounded-[12px] p-2.5" style={{ background: "var(--a-panel)" }}>
+              <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[0.8rem] font-bold text-white"
+                style={{ background: "linear-gradient(135deg,#8f6dff,#6234e8)" }}
+              >
+                {adminData.name?.trim()?.[0]?.toUpperCase() ?? "A"}
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                <span className="a-clamp-1 text-[0.8rem] font-semibold text-white">{adminData.name}</span>
+                <span className="text-[0.68rem] capitalize" style={{ color: "var(--a-text-3)" }}>
+                  {adminData.role}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={logOut}
+                aria-label="Sign out"
+                title="Sign out"
+                className="a-btn a-btn--ghost a-btn--icon shrink-0"
+              >
+                <LogOut size={15} />
+              </button>
+            </div>
+          )}
         </div>
       </aside>
     </>

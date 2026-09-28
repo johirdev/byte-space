@@ -50,17 +50,19 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
         borderBottom: "1px solid var(--a-line)",
       }}
     >
-      <div className="flex  items-center gap-3">
-        <span className="md:hidden">
-          <button
-            type="button"
-            onClick={onMenuToggle}
-            aria-label="Toggle navigation"
-            className="a-btn a-btn--ghost a-btn--icon lg:hidden"
-          >
-            <Menu size={18} />
-          </button>
-        </span>
+      <div className="flex min-w-0 items-center gap-3">
+        <button
+          type="button"
+          onClick={onMenuToggle}
+          aria-label="Toggle navigation"
+          className="a-btn a-btn--ghost a-btn--icon lg:hidden"
+        >
+          <Menu size={18} />
+        </button>
+        <p className="a-clamp-1 hidden text-[0.86rem] sm:block" style={{ color: "var(--a-text-2)" }}>
+          {greeting()},{" "}
+          <span className="font-semibold text-white">{adminData?.name?.split(" ")[0]}</span> 👋
+        </p>
       </div>
 
       <div className="flex items-center gap-3">
@@ -118,7 +120,7 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
               </div>
 
               <Link
-                href="/admins/account"
+                href="/dashboard/account"
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-[9px] px-3 py-2.5 text-[0.83rem] transition-colors hover:bg-[var(--a-hover)]"
@@ -129,7 +131,7 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle: () => void }) {
               </Link>
 
               <Link
-                href="/admins/profile"
+                href="/dashboard/profile"
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-[9px] px-3 py-2.5 text-[0.83rem] transition-colors hover:bg-[var(--a-hover)]"
