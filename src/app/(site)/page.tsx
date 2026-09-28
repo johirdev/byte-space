@@ -1,5 +1,6 @@
 import DiscoverPassion from "@/Components/Frontend/Pages/Home/DiscoverPassion/DiscoverPassion";
 import { DiverseLearningPath } from "@/Components/Frontend/Pages/Home/DiverseLearningPath/DiverseLearningPath";
+import Faq from "@/Components/Frontend/Pages/Home/Faq/Faq";
 import HeroSection from "@/Components/Frontend/Pages/Home/HeroSection/HeroSection";
 import { ProfessionalGrowth } from "@/Components/Frontend/Pages/Home/ProfessionalGrowth/ProfessionalGrowth";
 import Testimonials from "@/Components/Frontend/Pages/Home/Testimonials/Testimonials";
@@ -16,6 +17,7 @@ export default function Home() {
       <ProfessionalGrowth />
       <UnlockPotential />
       <Testimonials />
+      <Faq />
     </main>
   );
 }

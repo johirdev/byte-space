@@ -11,6 +11,7 @@ import {
   ExternalLink,
   FolderTree,
   GraduationCap,
+  HelpCircle,
   Receipt,
   UsersRound,
   LayoutDashboard,
@@ -53,7 +54,10 @@ const NAV: NavGroup[] = [
   },
   {
     title: "Site content",
-    items: [{ label: "Testimonials", href: "/dashboard/testimonials", icon: Quote }],
+    items: [
+      { label: "Testimonials", href: "/dashboard/testimonials", icon: Quote },
+      { label: "FAQs", href: "/dashboard/faqs", icon: HelpCircle },
+    ],
   },
   {
     title: "Creators",

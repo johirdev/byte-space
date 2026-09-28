@@ -286,3 +286,18 @@ export type ITestimonial = {
   createdAt?: string | Date;
   updatedAt?: string | Date;
 };
+
+/* ── FAQs ────────────────────────────────────────────────────────────── */
+export const FAQ_CATEGORIES = ["General", "Courses", "Payments", "Creators", "Account"] as const;
+export type FaqCategory = (typeof FAQ_CATEGORIES)[number];
+
+export type IFaq = {
+  _id?: string;
+  question: string;
+  answer: string;
+  category: FaqCategory;
+  order: number;
+  is_active: boolean;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+};

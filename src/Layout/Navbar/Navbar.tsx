@@ -154,8 +154,59 @@ function AccountMenu() {
   );
 }
 
+/** Turns solid after this many px; goes clear again only below SOLID_OFF (no flicker). */
+const SOLID_ON = 24;
+const SOLID_OFF = 4;
+/** Past this point, scrolling down tucks the bar away; scrolling up reveals it. */
+const HIDE_AFTER = 480;
+
+/**
+ * Scroll state for the sticky navbar, throttled to one update per frame.
+ * The reading-progress bar is written straight to the DOM (no re-render).
+ */
+function useScrollHeader(progressRef: React.RefObject<HTMLSpanElement | null>, locked: boolean) {
+  const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
+      }
+      setScrolled((was) => (was ? y > SOLID_OFF : y > SOLID_ON));
+      // Small deltas are ignored so trackpad jitter doesn't flicker the bar.
+      if (Math.abs(y - lastY) > 6) {
+        setHidden(y > lastY && y > HIDE_AFTER);
+        lastY = y;
+      }
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [progressRef]);
+
+  return { scrolled, hidden: hidden && !locked };
+}
+
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const progressRef = useRef<HTMLSpanElement>(null);
+  const { scrolled, hidden } = useScrollHeader(progressRef, open);
   const pathname = usePathname();
   const status = useAuthStore((s) => s.status);
   const user = useAuthStore((s) => s.user);
@@ -165,8 +216,23 @@ const Navbar = () => {
   const next = pathname && pathname !== "/" ? `?next=${encodeURIComponent(pathname)}` : "";
 
   return (
-    <header className="absolute inset-x-0 top-0 z-50">
-      <nav className="container-site relative flex h-[72px] items-center justify-between md:h-[120px]">
+    <header
+      data-scrolled={scrolled}
+      className="group fixed inset-x-0 top-0 z-50"
+      // Scroll-driven styles are inline so they never depend on a class being
+      // generated, and all three properties share one smooth transition.
+      style={{
+        backgroundColor: scrolled ? "#003BE2" : "rgba(0, 59, 226, 0)",
+        boxShadow: scrolled
+          ? "0 10px 30px -12px rgba(0, 20, 90, 0.55)"
+          : "0 10px 30px -12px rgba(0, 20, 90, 0)",
+        transform: hidden ? "translate3d(0, -100%, 0)" : "translate3d(0, 0, 0)",
+        transition:
+          "background-color 450ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 450ms cubic-bezier(0.22, 1, 0.36, 1), transform 450ms cubic-bezier(0.22, 1, 0.36, 1)",
+        willChange: "transform",
+      }}
+    >
+      <nav className="container-site relative flex h-[72px] items-center justify-between md:h-[82px]">
         {/* Logo */}
         <Link
           href="/"
@@ -194,7 +260,9 @@ const Navbar = () => {
                 href={link.href}
                 aria-current={isActive(link.href) ? "page" : undefined}
                 className={`text-base leading-none text-neutral-50 transition-opacity hover:opacity-80 ${
-                  isActive(link.href) ? "relative -top-0.5 font-medium" : "font-normal"
+                  isActive(link.href)
+                    ? "relative -top-0.5 font-medium"
+                    : "font-normal"
                 }`}
               >
                 {link.label}
@@ -208,11 +276,19 @@ const Navbar = () => {
           {status === "authenticated" ? (
             <AccountMenu />
           ) : (
-            <span className={`flex items-center gap-6 transition-opacity ${status === "idle" || status === "loading" ? "opacity-0" : "opacity-100"}`}>
-              <Link href={`/login${next}`} className="text-base leading-none text-neutral-50 transition-opacity hover:opacity-80">
+            <span
+              className={`flex items-center gap-6 transition-opacity ${status === "idle" || status === "loading" ? "opacity-0" : "opacity-100"}`}
+            >
+              <Link
+                href={`/login${next}`}
+                className="text-base leading-none text-neutral-50 transition-opacity hover:opacity-80"
+              >
                 Sign In
               </Link>
-              <Link href={`/register${next}`} className="text-base leading-none text-neutral-50 transition-opacity hover:opacity-80">
+              <Link
+                href={`/register${next}`}
+                className="text-base leading-none text-neutral-50 transition-opacity hover:opacity-80"
+              >
                 Join Us
               </Link>
             </span>
@@ -253,22 +329,35 @@ const Navbar = () => {
       {/* Mobile menu */}
       <div
         className={`container-site grid transition-[grid-template-rows,opacity] duration-300 md:hidden ${
-          open ? "grid-rows-[1fr] opacity-100" : "pointer-events-none grid-rows-[0fr] opacity-0"
+          open
+            ? "grid-rows-[1fr] opacity-100"
+            : "pointer-events-none grid-rows-[0fr] opacity-0"
         }`}
       >
         <div className="overflow-hidden">
           <div className="rounded-2xl bg-white p-4 shadow-card">
             {user && (
-              <Link href="/profile" onClick={() => setOpen(false)} className="mb-2 flex items-center gap-3 rounded-xl bg-neutral-50 p-3">
+              <Link
+                href="/profile"
+                onClick={() => setOpen(false)}
+                className="mb-2 flex items-center gap-3 rounded-xl bg-neutral-50 p-3"
+              >
                 <UserAvatar name={user.name} src={user.avatar} size={40} />
                 <span className="min-w-0">
-                  <span className="block truncate font-medium text-neutral-950">{user.name}</span>
-                  <span className="block truncate text-xs text-neutral-500">{user.email}</span>
+                  <span className="block truncate font-medium text-neutral-950">
+                    {user.name}
+                  </span>
+                  <span className="block truncate text-xs text-neutral-500">
+                    {user.email}
+                  </span>
                 </span>
               </Link>
             )}
             <ul className="flex flex-col">
-              {[...navLinks, ...(user ? accountLinksFor(user).slice(1) : [])].map((link) => (
+              {[
+                ...navLinks,
+                ...(user ? accountLinksFor(user).slice(1) : []),
+              ].map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
@@ -316,6 +405,26 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+      {/* Reading progress — lime hairline along the bottom edge once solid */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 overflow-hidden"
+        style={{
+          height: 2,
+          opacity: scrolled ? 1 : 0,
+          transition: "opacity 450ms ease",
+        }}
+      >
+        <span
+          ref={progressRef}
+          className="block h-full"
+          style={{
+            transform: "scaleX(0)",
+            transformOrigin: "left",
+            backgroundColor: "#d4fb20",
+          }}
+        />
+      </span>
     </header>
   );
 };
