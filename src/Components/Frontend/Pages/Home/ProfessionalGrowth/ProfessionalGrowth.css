@@ -1,0 +1,101 @@
+/* Near-white base the glows sit on (matches the Figma frame). */
+.pg-section {
+  background-color: #f8f8fb;
+}
+
+/* Soft, heavily blurred colour glows. Pure CSS transforms → GPU-composited. */
+.pg-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  will-change: transform;
+  animation: pg-drift 18s ease-in-out infinite alternate;
+}
+
+.pg-blob--lime-top {
+  top: -8%;
+  left: 18%;
+  width: 46vw;
+  max-width: 660px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(212 251 32 / 0.42), transparent 68%);
+}
+.pg-blob--lavender-top {
+  top: -6%;
+  right: -12%;
+  width: 40vw;
+  max-width: 560px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(150 165 255 / 0.22), transparent 70%);
+  animation-duration: 22s;
+  animation-delay: -6s;
+}
+.pg-blob--blue-left {
+  top: 40%;
+  left: -14%;
+  width: 34vw;
+  max-width: 480px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(40 114 255 / 0.2), transparent 70%);
+  animation-duration: 20s;
+  animation-delay: -3s;
+}
+.pg-blob--lime-bottom {
+  bottom: -10%;
+  left: -12%;
+  width: 40vw;
+  max-width: 560px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(212 251 32 / 0.4), transparent 68%);
+  animation-duration: 24s;
+  animation-delay: -9s;
+}
+.pg-blob--blue-bottom {
+  bottom: -14%;
+  right: -10%;
+  width: 46vw;
+  max-width: 660px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(40 114 255 / 0.24), transparent 70%);
+  animation-duration: 26s;
+  animation-delay: -12s;
+}
+
+@keyframes pg-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, -5%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-3%, 4%, 0) scale(0.96);
+  }
+}
+
+/* Gentle idle float on the two hero images (inner wrapper, so it composes
+   with the scroll parallax applied by motion on the outer one). */
+.pg-float {
+  animation: pg-float 7s ease-in-out infinite;
+}
+.pg-float-alt {
+  animation: pg-float 8s ease-in-out -3s infinite;
+}
+
+@keyframes pg-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-blob,
+  .pg-float,
+  .pg-float-alt {
+    animation: none;
+  }
+}
