@@ -1,0 +1,17 @@
+/* Continuous marquee: linear easing so autoplay never "steps" between slides. */
+.trusted-swiper .swiper-wrapper {
+  transition-timing-function: linear !important;
+}
+
+/* Soft fade at the edges so logos glide in/out instead of being cut off. */
+.trusted-swiper {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 12%, #000 88%, transparent 100%);
+}
+
+@media (width >= 80rem) {
+  .trusted-swiper {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+  }
+}
