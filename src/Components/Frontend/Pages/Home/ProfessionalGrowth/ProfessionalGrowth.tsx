@@ -10,8 +10,6 @@ import {
   m,
   useInView,
   useReducedMotion,
-  useScroll,
-  useTransform,
   type Variants,
 } from "motion/react";
 import { CircleCheck } from "lucide-react";
@@ -70,7 +68,10 @@ function CountUp({ value, suffix }: { value: number; suffix: string }) {
   );
 }
 
-/** Image that fades/scales in, drifts on scroll (parallax) and floats gently. */
+/**
+ * Image that fades/scales in once, then floats gently. (No scroll parallax:
+ * driving `y` from scroll AND the entrance made the image jolt mid-scroll.)
+ */
 function FloatingImage({
   src,
   alt,
@@ -84,12 +85,8 @@ function FloatingImage({
   className?: string;
   float?: "pg-float" | "pg-float-alt";
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [36, -36]);
-
   return (
-    <m.div ref={ref} variants={imageIn} style={{ y }} className={className}>
+    <m.div variants={imageIn} className={className}>
       <div className={float}>
         <Image src={src} alt={alt} sizes={sizes} className="h-auto w-full select-none" draggable={false} />
       </div>
