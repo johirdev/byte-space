@@ -1,0 +1,57 @@
+/* Near-white base with the lime/blue glows from the Figma frame. */
+.tm-section {
+  background-color: #f8f8f8;
+}
+
+.tm-glow {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  will-change: transform;
+  animation: tm-drift 20s ease-in-out infinite alternate;
+}
+.tm-glow--lime-center {
+  top: -6%;
+  left: 36%;
+  width: 34vw;
+  max-width: 500px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(212 251 32 / 0.5), transparent 68%);
+}
+.tm-glow--lime-right {
+  top: 22%;
+  right: -12%;
+  width: 30vw;
+  max-width: 440px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(212 251 32 / 0.42), transparent 68%);
+  animation-duration: 24s;
+  animation-delay: -8s;
+}
+.tm-glow--blue-left {
+  bottom: -20%;
+  left: -10%;
+  width: 34vw;
+  max-width: 500px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(40 114 255 / 0.28), transparent 70%);
+  animation-duration: 22s;
+  animation-delay: -4s;
+}
+
+@keyframes tm-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(3%, -4%, 0) scale(1.06); }
+  100% { transform: translate3d(-3%, 3%, 0) scale(0.97); }
+}
+
+/* Cards keep their natural heights, top-aligned (as in the design). */
+.tm-swiper .swiper-wrapper {
+  align-items: flex-start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-glow {
+    animation: none;
+  }
+}

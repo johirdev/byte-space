@@ -17,6 +17,7 @@ import {
   LogOut,
   MessageSquareQuote,
   Plus,
+  Quote,
   ShieldCheck,
   UserCog,
   X,
@@ -49,6 +50,10 @@ const NAV: NavGroup[] = [
       { label: "Categories", href: "/dashboard/course-categories", icon: FolderTree },
       { label: "Reviews", href: "/dashboard/course-reviews", icon: MessageSquareQuote },
     ],
+  },
+  {
+    title: "Site content",
+    items: [{ label: "Testimonials", href: "/dashboard/testimonials", icon: Quote }],
   },
   {
     title: "Creators",

@@ -270,3 +270,19 @@ export type MyCreatorStatus = {
   /** ISO time the next application is allowed, or null when allowed now. */
   next_allowed_at: string | null;
 };
+
+/* ── Testimonials (home page) ────────────────────────────────────────── */
+export type ITestimonial = {
+  _id?: string;
+  name: string;
+  /** Shown in blue under the name, e.g. "Enthusiastic Learner". */
+  role: string;
+  avatar: string;
+  quote: string;
+  /** Optional 1–5; not shown in the current design. */
+  rating?: number;
+  order: number;
+  is_active: boolean;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+};
