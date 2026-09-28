@@ -1,0 +1,32 @@
+/* Idle motion for the 3D shapes once they've landed. Three rhythms so the
+   shapes never move in lock-step. Pure transforms → GPU-composited. */
+.up-float-a {
+  animation: up-float-a 7s ease-in-out infinite;
+}
+.up-float-b {
+  animation: up-float-b 8.5s ease-in-out -2s infinite;
+}
+.up-float-c {
+  animation: up-float-c 6.5s ease-in-out -4s infinite;
+}
+
+@keyframes up-float-a {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -10px, 0) rotate(-3deg); }
+}
+@keyframes up-float-b {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(6px, -12px, 0) rotate(4deg); }
+}
+@keyframes up-float-c {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(-5px, -8px, 0) rotate(-5deg) scale(1.03); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .up-float-a,
+  .up-float-b,
+  .up-float-c {
+    animation: none;
+  }
+}

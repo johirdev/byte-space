@@ -10,6 +10,7 @@ import LoginAdmin from "@/Components/Dashboard/LoginAdmin/LoginAdmin";
 import Navbar from "@/Layout/Dashboard/Navbar/Navbar";
 import AdminFooter from "@/Layout/Dashboard/Footer/Footer";
 import Sidebar from "@/Layout/Dashboard/Sidebar/Sidebar";
+import BrandLoader from "@/Components/Shared/BrandLoader";
 
 export default function AdminLayout({
   children,
@@ -28,20 +29,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   const [navOpen, setNavOpen] = useState(false);
 
   if (loading) {
-    return (
-      <div className="admin-root grid min-h-screen place-items-center">
-        <div className="flex flex-col items-center gap-3">
-          <span
-            className="h-8 w-8 animate-spin rounded-full border-2 border-white/15"
-            style={{ borderTopColor: "var(--a-brand)" }}
-            aria-hidden="true"
-          />
-          <p className="text-[0.82rem]" style={{ color: "var(--a-text-3)" }}>
-            Restoring your session…
-          </p>
-        </div>
-      </div>
-    );
+    return <BrandLoader variant="admin" label="Restoring your session" />;
   }
 
   if (!token) return <LoginAdmin />;
