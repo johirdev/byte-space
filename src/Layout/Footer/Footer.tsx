@@ -22,9 +22,9 @@ const COLUMNS = [
   [
     { label: "Become a Creator", href: "/become-creator" },
     { label: "Affiliate Program", href: "#" },
-    { label: "Contact", href: "#" },
-    { label: "Help", href: "#" },
-    { label: "About", href: "#" },
+    { label: "Contact", href: "/contact" },
+    { label: "Help", href: "/contact#faq" },
+    { label: "About", href: "/about" },
   ],
 ];
 

@@ -15,3 +15,48 @@
 .hero-visual {
   aspect-ratio: 1149 / 442;
 }
+
+/* Idle float for shapes and stat cards once they've landed — three rhythms
+   so nothing moves in lock-step. Pure transforms (GPU-composited). */
+.hero-float-a {
+  animation: hero-float-a 7s ease-in-out 1.6s infinite;
+}
+.hero-float-b {
+  animation: hero-float-b 8.5s ease-in-out 1.8s infinite;
+}
+.hero-float-c {
+  animation: hero-float-c 6.5s ease-in-out 2s infinite;
+}
+
+@keyframes hero-float-a {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -10px, 0) rotate(-2deg); }
+}
+@keyframes hero-float-b {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(5px, -12px, 0) rotate(2deg); }
+}
+@keyframes hero-float-c {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-4px, -8px, 0); }
+}
+
+/* Soft lime light behind the man that breathes slowly. */
+.hero-glow {
+  background: radial-gradient(circle, rgb(212 251 32 / 0.35) 0%, rgb(212 251 32 / 0) 65%);
+  filter: blur(30px);
+  animation: hero-glow 5s ease-in-out 1s infinite;
+}
+@keyframes hero-glow {
+  0%, 100% { opacity: 0.55; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float-a,
+  .hero-float-b,
+  .hero-float-c,
+  .hero-glow {
+    animation: none;
+  }
+}

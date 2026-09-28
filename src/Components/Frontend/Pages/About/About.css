@@ -1,0 +1,28 @@
+/* Gentle idle float for the decorative 3D shapes. */
+.about-float-a {
+  animation: about-float-a 7s ease-in-out infinite;
+}
+.about-float-b {
+  animation: about-float-b 8s ease-in-out -3s infinite;
+}
+@keyframes about-float-a {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -12px, 0) rotate(-3deg); }
+}
+@keyframes about-float-b {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(-6px, -10px, 0) rotate(4deg); }
+}
+
+/* Soft brand glow behind the mission image. */
+.about-glow {
+  background: radial-gradient(circle, rgb(212 251 32 / 0.45), rgb(40 114 255 / 0.12) 55%, transparent 72%);
+  filter: blur(40px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-float-a,
+  .about-float-b {
+    animation: none;
+  }
+}

@@ -14,6 +14,8 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "Courses", href: "/courses" },
   { label: "Creators", href: "/creator-profile" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const ACCOUNT_LINKS = [
@@ -253,16 +255,14 @@ const Navbar = () => {
         </Link>
 
         {/* Center links (desktop) */}
-        <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 md:flex">
+        <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 lg:flex xl:gap-6">
           {navLinks.map((link) => (
             <li key={link.label}>
               <Link
                 href={link.href}
                 aria-current={isActive(link.href) ? "page" : undefined}
                 className={`text-base leading-none text-neutral-50 transition-opacity hover:opacity-80 ${
-                  isActive(link.href)
-                    ? "relative -top-0.5 font-medium"
-                    : "font-normal"
+                  isActive(link.href) ? "relative  font-medium" : "font-normal"
                 }`}
               >
                 {link.label}
@@ -272,7 +272,7 @@ const Navbar = () => {
         </ul>
 
         {/* Right actions (desktop) */}
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden items-center gap-6 lg:flex">
           {status === "authenticated" ? (
             <AccountMenu />
           ) : (
@@ -297,7 +297,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile actions */}
-        <div className="flex items-center gap-4 md:hidden">
+        <div className="flex items-center gap-4 lg:hidden">
           <CartLink />
           <button
             type="button"
@@ -328,7 +328,7 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       <div
-        className={`container-site grid transition-[grid-template-rows,opacity] duration-300 md:hidden ${
+        className={`container-site grid transition-[grid-template-rows,opacity] duration-300 lg:hidden ${
           open
             ? "grid-rows-[1fr] opacity-100"
             : "pointer-events-none grid-rows-[0fr] opacity-0"
