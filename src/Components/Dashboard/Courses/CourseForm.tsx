@@ -795,7 +795,7 @@ export default function CourseForm({ courseId }: { courseId?: string }) {
           <div className="a-card a-card--pad">
             <p className="a-section__title mb-3">Card preview</p>
             <div className="pointer-events-none rounded-[18px] bg-white p-1.5">
-              <CoursesCard course={preview} />
+              <CoursesCard course={preview} showCart={false} />
             </div>
             {selectedCategory && (
               <p className="a-hint mt-2.5">

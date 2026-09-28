@@ -76,3 +76,16 @@ export const studentAvatars = (seed: string, count = 4): string[] => {
   for (const ch of seed) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return Array.from({ length: count }, (_, i) => `https://i.pravatar.cc/64?img=${((h + i * 7) % 70) + 1}`);
 };
+
+/** URL slug for a creator (same rule the API uses to look creators up). */
+export const creatorSlug = (name?: string): string =>
+  (name ?? "")
+    .toLowerCase()
+    .trim()
+    .normalize("NFKD")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 90);
+
+export const creatorHref = (name?: string) => `/creator-profile/${creatorSlug(name)}`;

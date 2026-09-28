@@ -22,7 +22,25 @@ type RequestOptions = {
   query?: Record<string, string | number | boolean | undefined | null>;
   signal?: AbortSignal;
   cache?: RequestCache;
+  /**
+   * "user" = learner endpoint authenticated by httpOnly cookies: on a 401 the
+   * client silently refreshes the session once and retries.
+   */
+  auth?: "user";
 };
+
+let refreshing: Promise<boolean> | null = null;
+
+/** One shared refresh for every request that hit a 401 at the same time. */
+export function refreshUserSession(): Promise<boolean> {
+  refreshing ??= fetch(`${API_BASE}/users/refresh`, { method: "POST", credentials: "include" })
+    .then((res) => res.ok)
+    .catch(() => false)
+    .finally(() => {
+      setTimeout(() => (refreshing = null), 0);
+    });
+  return refreshing;
+}
 
 export const buildQuery = (
   query: RequestOptions["query"] = {},
@@ -44,8 +62,9 @@ export const buildQuery = (
 export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
+  retried = false,
 ): Promise<{ data: T; meta?: ApiMeta; message: string }> {
-  const { method = "GET", body, token, query, signal, cache } = options;
+  const { method = "GET", body, token, query, signal, cache, auth } = options;
 
   const headers: Record<string, string> = {};
   if (body !== undefined) headers["Content-Type"] = "application/json";
@@ -64,6 +83,10 @@ export async function apiRequest<T>(
   } catch (err) {
     if ((err as Error)?.name === "AbortError") throw err;
     throw new ApiClientError(0, "Network error — please check your connection.");
+  }
+
+  if (res.status === 401 && auth === "user" && !retried && (await refreshUserSession())) {
+    return apiRequest<T>(path, options, true);
   }
 
   let json: ApiResponse<T>;

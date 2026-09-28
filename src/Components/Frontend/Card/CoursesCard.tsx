@@ -2,12 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import type { ICourse } from "@/app/types";
+import { CardCartButton } from "../Shared/CartButtons";
 import {
   formatCount,
   formatDuration,
   formatPrice,
   imageProps,
   studentAvatars,
+  creatorHref,
 } from "../utils/course";
 
 export type CourseCardData = Pick<
@@ -54,7 +56,16 @@ const Stat = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-const CoursesCard = ({ course, priority = false }: { course: CourseCardData; priority?: boolean }) => {
+const CoursesCard = ({
+  course,
+  priority = false,
+  showCart = true,
+}: {
+  course: CourseCardData;
+  priority?: boolean;
+  /** Off for static previews (e.g. the admin editor). */
+  showCart?: boolean;
+}) => {
   const href = `/courses/${course.slug}`;
   const avatars = studentAvatars(course.slug);
 
@@ -96,7 +107,10 @@ const CoursesCard = ({ course, priority = false }: { course: CourseCardData; pri
         </div>
 
         <p className="mt-0.5 text-xs text-neutral-500">
-          by <span className="text-primary-600">{course.creator?.name || "ByteSpace"}</span>
+          by{" "}
+          <Link href={creatorHref(course.creator?.name)} className="relative z-10 text-primary-600 hover:underline">
+            {course.creator?.name || "ByteSpace"}
+          </Link>
         </p>
 
         <div className="mt-4 flex items-center gap-3">
@@ -124,12 +138,15 @@ const CoursesCard = ({ course, priority = false }: { course: CourseCardData; pri
           </span>
         </div>
 
-        <p className="mt-4 flex items-baseline gap-0.5">
-          <span className="font-heading text-lg font-bold text-primary-600">{formatPrice(course.price)}</span>
-          {course.price > 0 && (
-            <span className="text-xs text-neutral-500">/{course.price_label || "lifetime"}</span>
-          )}
-        </p>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <p className="flex items-baseline gap-0.5">
+            <span className="font-heading text-lg font-bold text-primary-600">{formatPrice(course.price)}</span>
+            {course.price > 0 && (
+              <span className="text-xs text-neutral-500">/{course.price_label || "lifetime"}</span>
+            )}
+          </p>
+          {showCart && <CardCartButton course={course} />}
+        </div>
       </div>
     </article>
   );

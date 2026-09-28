@@ -24,6 +24,8 @@ export const GET = route(async (req: NextRequest) => {
     featured: params.get("featured"),
     status: params.get("status"),
     sort: params.get("sort"),
+    ids: params.get("ids"),
+    creator: params.get("creator"),
     page,
     limit,
     admin: isAdminScope(req),

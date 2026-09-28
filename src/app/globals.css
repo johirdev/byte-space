@@ -326,3 +326,47 @@
     linear-gradient(90deg, rgb(255 255 255 / 0.08) 1px, transparent 1px);
   background-size: 48px 48px;
 }
+
+/* --------------------------------------------------------------------------
+   9. Follow button micro-interaction (creator profile)
+   -------------------------------------------------------------------------- */
+@keyframes follow-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.88); }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes follow-burst {
+  0% { transform: translate(-50%, -50%) rotate(var(--r)) translateY(0) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(var(--r)) translateY(-34px) scale(0.2); opacity: 0; }
+}
+@keyframes count-up {
+  0% { transform: translateY(60%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@utility animate-follow-pop {
+  animation: follow-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@utility animate-count-up {
+  animation: count-up 0.35s ease-out;
+}
+.follow-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  pointer-events: none;
+  animation: follow-burst 0.6s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-follow-pop,
+  .animate-count-up,
+  .follow-spark {
+    animation: none;
+  }
+  .follow-spark {
+    display: none;
+  }
+}

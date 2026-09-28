@@ -1,6 +1,7 @@
 import { isValidObjectId, Types } from "mongoose";
 import { CourseReviewModel } from "../models/courseReview.model";
 import { CourseModel } from "../models/course.model";
+import { EnrollmentModel } from "../models/enrollment.model";
 import {
   REVIEW_STATUSES,
   type ICourseReview,
@@ -224,3 +225,88 @@ export const deleteReview = async (id: string): Promise<ICourseReview> => {
   await recomputeCourseRating(review.course);
   return review;
 };
+
+// ── LEARNER REVIEWS ───────────────────────────────────────────────────────
+// Signed-in learners review courses they're enrolled in — one each. Name,
+// avatar and headline are copied from their profile (and kept in sync by
+// user.service when the profile changes).
+
+type Author = { _id?: string; name: string; avatar?: string; headline?: string };
+
+const learnerFields = (body: Record<string, unknown>, partial: boolean) => {
+  const check = new FieldCheck();
+  const out: Record<string, unknown> = {};
+
+  if (!partial || body.rating !== undefined) {
+    const rating = num(body.rating);
+    check.custom("rating", rating !== undefined && rating >= 1 && rating <= 5, "Pick a rating from 1 to 5 stars");
+    out.rating = Math.round(rating ?? 0);
+  }
+  if (!partial || body.comment !== undefined) {
+    const comment = str(body.comment);
+    check
+      .require("comment", comment, "Your review")
+      .minLength("comment", comment, 10, "Your review");
+    check.custom("comment", (comment?.length ?? 0) <= 2000, "Keep it under 2000 characters");
+    out.comment = comment;
+  }
+  check.throwIfFailed();
+  return out;
+};
+
+export const listMyReviews = (userId: string) =>
+  CourseReviewModel.find({ user: userId })
+    .populate(COURSE_POPULATE)
+    .sort({ createdAt: -1 })
+    .lean<ICourseReview[]>();
+
+export async function createMyReview(author: Author, body: Record<string, unknown>): Promise<ICourseReview> {
+  const courseKey = str(body.course);
+  if (!courseKey) throw new ApiError(400, "Choose a course", { course: "Choose a course" });
+  const courseId = await resolveCourseId(courseKey);
+
+  if (!(await EnrollmentModel.exists({ user: author._id, course: courseId }))) {
+    throw new ApiError(403, "Only enrolled learners can review this course");
+  }
+  if (await CourseReviewModel.exists({ user: author._id, course: courseId })) {
+    throw new ApiError(409, "You've already reviewed this course — edit your review instead");
+  }
+
+  const created = await CourseReviewModel.create({
+    ...learnerFields(body, false),
+    course: courseId,
+    user: author._id,
+    name: author.name,
+    avatar: author.avatar ?? "",
+    designation: author.headline ?? "",
+    status: "approved",
+  });
+  await recomputeCourseRating(courseId);
+  return (await CourseReviewModel.findById(created._id).populate(COURSE_POPULATE).lean<ICourseReview>())!;
+}
+
+export async function updateMyReview(
+  userId: string,
+  id: string,
+  body: Record<string, unknown>,
+): Promise<ICourseReview> {
+  const review = await CourseReviewModel.findOne({ _id: id, user: userId }).lean<ReviewRow>();
+  if (!review) throw new ApiError(404, "Review not found");
+
+  const updated = await CourseReviewModel.findByIdAndUpdate(
+    id,
+    { $set: learnerFields(body, true) },
+    { new: true, runValidators: true },
+  )
+    .populate(COURSE_POPULATE)
+    .lean<ICourseReview>();
+  await recomputeCourseRating(review.course);
+  return updated!;
+}
+
+export async function deleteMyReview(userId: string, id: string): Promise<void> {
+  const review = await CourseReviewModel.findOne({ _id: id, user: userId }).lean<ReviewRow>();
+  if (!review) throw new ApiError(404, "Review not found");
+  await CourseReviewModel.deleteOne({ _id: id });
+  await recomputeCourseRating(review.course);
+}

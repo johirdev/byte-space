@@ -1,6 +1,7 @@
 /**
  * Course domain types — shared by the API, the public site and the admin panel.
  */
+import type { IOrder } from "./user.interface";
 
 type WithTimestamps = {
   _id?: string;
@@ -140,6 +141,8 @@ export type CourseRef = Pick<ICourse, "_id" | "title" | "slug" | "thumbnail">;
 
 export type ICourseReview = WithTimestamps & {
   course: string | CourseRef;
+  /** Set when a signed-in learner wrote it; absent for admin-authored (demo) reviews. */
+  user?: string | null;
   name: string;
   designation?: string;
   avatar?: string;
@@ -171,4 +174,22 @@ export type DashboardStats = {
     "_id" | "title" | "slug" | "thumbnail" | "rating_avg" | "rating_count" | "students_count"
   >[];
   recentReviews: ICourseReview[];
+  learners: { users: number; newUsers: number; enrollments: number; orders: number; revenue: number };
+  recentOrders: IOrder[];
+};
+
+/* ── Creator (derived from courses' `creator` block) ─────────────────── */
+export type CreatorSummary = {
+  slug: string;
+  name: string;
+  title: string;
+  avatar: string;
+  bio: string;
+  stats: { courses: number; students: number; reviews: number; rating: number };
+  /** Demo count (no follow system yet) — stable per creator. */
+  followers: number;
+};
+
+export type CreatorProfile = CreatorSummary & {
+  categories: { name: string; slug: string; count: number }[];
 };

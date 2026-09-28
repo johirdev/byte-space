@@ -8,6 +8,9 @@ import {
   BookOpen,
   ExternalLink,
   FolderTree,
+  GraduationCap,
+  Receipt,
+  UsersRound,
   LayoutDashboard,
   LogOut,
   MessageSquareQuote,
@@ -43,6 +46,14 @@ const NAV: NavGroup[] = [
       { label: "Add course", href: "/dashboard/courses/create", icon: Plus, roles: CONTENT_EDITORS },
       { label: "Categories", href: "/dashboard/course-categories", icon: FolderTree },
       { label: "Reviews", href: "/dashboard/course-reviews", icon: MessageSquareQuote },
+    ],
+  },
+  {
+    title: "Students & sales",
+    items: [
+      { label: "Students", href: "/dashboard/students", icon: UsersRound },
+      { label: "Orders", href: "/dashboard/orders", icon: Receipt },
+      { label: "Enrollments", href: "/dashboard/enrollments", icon: GraduationCap },
     ],
   },
   {

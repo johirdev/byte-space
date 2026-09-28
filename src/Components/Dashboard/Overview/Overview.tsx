@@ -13,6 +13,10 @@ import {
   Star,
   TriangleAlert,
   UsersRound,
+  UserPlus,
+  DollarSign,
+  GraduationCap,
+  ShoppingCart,
 } from "lucide-react";
 import { AuthContext } from "@/app/dashboard/AuthProvider";
 import { apiRequest, ApiClientError } from "@/app/lib/apiClient";
@@ -112,6 +116,37 @@ export default function Overview() {
             />
           </div>
 
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <StatTile
+              label="Learners"
+              value={stats.learners.users}
+              hint={`${stats.learners.newUsers} joined in the last 30 days`}
+              tone="brand"
+              icon={<UserPlus size={19} />}
+            />
+            <StatTile
+              label="Revenue"
+              value={`$${stats.learners.revenue.toLocaleString()}`}
+              hint={`${stats.learners.orders} paid orders (demo)`}
+              tone="signal"
+              icon={<DollarSign size={19} />}
+            />
+            <StatTile
+              label="Enrollments"
+              value={stats.learners.enrollments}
+              hint="Course seats sold"
+              tone="sky"
+              icon={<GraduationCap size={19} />}
+            />
+            <StatTile
+              label="Avg. order"
+              value={`$${(stats.learners.orders ? stats.learners.revenue / stats.learners.orders : 0).toFixed(2)}`}
+              hint="Revenue ÷ paid orders"
+              tone="coral"
+              icon={<ShoppingCart size={19} />}
+            />
+          </div>
+
           {stats.courses.total === 0 && (
             <div className="a-card a-card--pad mt-5 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -193,6 +228,30 @@ export default function Overview() {
                     </li>
                   ))}
                 </ol>
+              )}
+            </Panel>
+
+            {/* Recent orders */}
+            <Panel title="Recent orders" href="/dashboard/orders" linkLabel="All orders">
+              {stats.recentOrders.length === 0 ? (
+                <Empty text="No orders yet — they appear after learners check out." />
+              ) : (
+                <ul className="flex flex-col">
+                  {stats.recentOrders.map((o) => (
+                    <li key={o.order_no} className="flex items-center gap-3 py-2.5" style={{ borderBottom: "1px solid var(--a-line)" }}>
+                      <span className="min-w-0 flex-1">
+                        <Link href={`/dashboard/orders?q=${o.order_no}`} className="a-clamp-1 text-[0.84rem] font-semibold text-white hover:underline">
+                          {o.customer.name}
+                        </Link>
+                        <span className="block text-[0.72rem]" style={{ color: "var(--a-text-3)" }}>
+                          {o.order_no} · {o.items.length} course{o.items.length > 1 ? "s" : ""} · {timeAgo(o.createdAt)}
+                        </span>
+                      </span>
+                      <span className={`a-badge ${o.status === "paid" ? "a-badge--signal" : "a-badge--ember"}`}>{o.status}</span>
+                      <Money amount={o.total} />
+                    </li>
+                  ))}
+                </ul>
               )}
             </Panel>
 

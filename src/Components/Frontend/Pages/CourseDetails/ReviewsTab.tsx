@@ -7,6 +7,9 @@ import { apiRequest, ApiClientError } from "@/app/lib/apiClient";
 import type { ApiMeta, ICourse, ICourseReview, ReviewSummary } from "@/app/types";
 import { imageProps, timeAgo } from "../../utils/course";
 import Stars from "./Stars";
+import Link from "next/link";
+import { useAuthStore } from "@/store/authStore";
+import ReviewModal, { type MyReview } from "../../Shared/ReviewModal";
 
 const PAGE_SIZE = 4;
 const RATING_FILTERS = [5, 4, 3, 2, 1] as const;
@@ -21,6 +24,7 @@ export default function ReviewsTab({ course }: { course: ICourse }) {
   const [meta, setMeta] = useState<ApiMeta | undefined>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,7 +49,7 @@ export default function ReviewsTab({ course }: { course: ICourse }) {
     };
     void load();
     return () => controller.abort();
-  }, [course.slug, rating, page]);
+  }, [course.slug, rating, page, reloadKey]);
 
   const chooseRating = (value: number | null) => {
     setRating(value);
@@ -93,6 +97,8 @@ export default function ReviewsTab({ course }: { course: ICourse }) {
           })}
         </ul>
       </section>
+
+      <MyReviewPanel course={course} onChanged={() => { setPage(1); setReloadKey((k) => k + 1); }} />
 
       {/* Individual reviews */}
       <section>
@@ -198,5 +204,70 @@ function ReviewCard({ review }: { review: ICourseReview }) {
 
       <p className="mt-4 text-sm leading-[1.75] text-neutral-500">{review.comment}</p>
     </article>
+  );
+}
+
+/** "Your review" box — only for learners enrolled in the course. */
+function MyReviewPanel({ course, onChanged }: { course: ICourse; onChanged: () => void }) {
+  const status = useAuthStore((s) => s.status);
+  const enrolled = useAuthStore((s) => s.isEnrolled(course._id));
+  const [mine, setMine] = useState<MyReview | null | undefined>(undefined);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!enrolled) return;
+    apiRequest<(ICourseReview & { _id: string })[]>("/users/me/reviews", { auth: "user" })
+      .then(({ data }) => {
+        const found = data.find((r) => String(typeof r.course === "object" ? r.course._id : r.course) === String(course._id));
+        setMine(found ? { _id: found._id, rating: found.rating, comment: found.comment } : null);
+      })
+      .catch(() => setMine(null));
+  }, [enrolled, course._id]);
+
+  if (status !== "authenticated") {
+    return (
+      <p className="rounded-2xl bg-neutral-50 px-5 py-4 text-sm text-neutral-500">
+        <Link href={`/login?next=/courses/${course.slug}%23reviews`} className="font-medium text-primary-600 hover:underline">
+          Sign in
+        </Link>{" "}
+        and enroll to share your own review.
+      </p>
+    );
+  }
+  if (!enrolled || mine === undefined) return null;
+
+  return (
+    <section className="flex flex-col gap-4 rounded-2xl border border-primary-100 bg-primary-50/60 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="font-medium text-neutral-950">{mine ? "Your review" : "You're enrolled — how is it going?"}</p>
+        {mine ? (
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <Stars value={mine.rating} size="size-3.5" />
+            <span className="line-clamp-1 text-sm text-neutral-500">{mine.comment}</span>
+          </div>
+        ) : (
+          <p className="mt-1 text-sm text-neutral-500">Your rating helps other learners choose.</p>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="h-10 shrink-0 cursor-pointer rounded-full bg-secondary-400 px-5 text-sm font-medium text-neutral-950 hover:bg-secondary-300"
+      >
+        {mine ? "Edit review" : "Write a review"}
+      </button>
+      {open && (
+        <ReviewModal
+          open
+          course={{ _id: String(course._id), title: course.title }}
+          existing={mine}
+          onClose={() => setOpen(false)}
+          onSaved={(review) => {
+            setMine(review);
+            onChanged();
+          }}
+        />
+      )}
+    </section>
   );
 }

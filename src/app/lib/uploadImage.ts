@@ -1,4 +1,4 @@
-import { API_BASE, ApiClientError } from "./apiClient";
+import { API_BASE, ApiClientError, refreshUserSession } from "./apiClient";
 import type { ApiResponse } from "../types";
 
 export type UploadedImage = {
@@ -19,11 +19,13 @@ export const checkImageFile = (file: File): string | null => {
   return null;
 };
 
-/**
- * Uploads through `/api/v1/upload`, which forwards to imgbb with the
- * server-side key. Returns the hosted URL.
- */
-export async function uploadImage(file: File, token: string | null): Promise<UploadedImage> {
+/** Multipart POST that unwraps the API envelope (JSON helper can't send files). */
+export async function postImage<T>(
+  path: string,
+  file: File,
+  opts: { token?: string | null; auth?: "user" } = {},
+  retried = false,
+): Promise<{ data: T; message: string }> {
   const problem = checkImageFile(file);
   if (problem) throw new ApiClientError(400, problem);
 
@@ -32,19 +34,31 @@ export async function uploadImage(file: File, token: string | null): Promise<Upl
 
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/upload`, {
+    res = await fetch(`${API_BASE}${path}`, {
       method: "POST",
       body,
       credentials: "include",
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      headers: opts.token ? { Authorization: `Bearer ${opts.token}` } : undefined,
     });
   } catch {
     throw new ApiClientError(0, "Network error — the image was not uploaded");
   }
 
-  const json = (await res.json().catch(() => ({}))) as ApiResponse<UploadedImage>;
-  if (!res.ok || !json.success || !json.data) {
+  if (res.status === 401 && opts.auth === "user" && !retried && (await refreshUserSession())) {
+    return postImage<T>(path, file, opts, true);
+  }
+
+  const json = (await res.json().catch(() => ({}))) as ApiResponse<T>;
+  if (!res.ok || !json.success || json.data === undefined) {
     throw new ApiClientError(res.status, json.message || "Upload failed", json.errors);
   }
-  return json.data;
+  return { data: json.data, message: json.message };
+}
+
+/**
+ * Admin upload through `/api/v1/upload`, which forwards to imgbb with the
+ * server-side key. Returns the hosted URL.
+ */
+export async function uploadImage(file: File, token: string | null): Promise<UploadedImage> {
+  return (await postImage<UploadedImage>("/upload", file, { token })).data;
 }

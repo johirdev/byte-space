@@ -6,7 +6,7 @@ import { Check, Share2, Star, UsersRound } from "lucide-react";
 import { apiRequest, ApiClientError } from "@/app/lib/apiClient";
 import type { ICourse } from "@/app/types";
 import { LevelIcon } from "../../Card/CoursesCard";
-import { categoryOf } from "../../utils/course";
+import { categoryOf, creatorHref } from "../../utils/course";
 import CourseVideo from "./CourseVideo";
 import CourseSideCard from "./CourseSideCard";
 import AboutTab from "./AboutTab";
@@ -84,11 +84,11 @@ export default function CourseDetails({ slug }: { slug: string }) {
         {/* Blue band behind the header + video rows, bleeding to the viewport edges. */}
         <div
           aria-hidden="true"
-          className="bg-hero-grid col-span-full row-start-1 row-end-3 -z-10 mx-[calc(50%-50vw)] -mt-[72px] md:-mt-[120px]"
+          className="bg-hero-grid pointer-events-none col-[1/-1] row-[1/3] -z-10 mx-[calc(50%-50vw)] -mt-[72px] md:-mt-[120px]"
         />
 
         {/* ── Header ───────────────────────────────────────── */}
-        <header className="col-span-full row-start-1 flex flex-col-reverse gap-4 pt-6 pb-10 sm:flex-row sm:items-start sm:justify-between md:pt-4 md:pb-11">
+        <header className="col-[1/-1] row-start-1 flex flex-col-reverse gap-4 pt-6 pb-10 sm:flex-row sm:items-start sm:justify-between md:pt-4 md:pb-11">
           <div className="min-w-0">
             {category && (
               <Link
@@ -105,7 +105,10 @@ export default function CourseDetails({ slug }: { slug: string }) {
               <p className="mt-1 font-heading text-base font-semibold text-white md:text-lg">{course.subtitle}</p>
             )}
             <p className="mt-4 text-base text-white">
-              by <span className="text-secondary-400">{course.creator?.name}</span>
+              by{" "}
+              <Link href={creatorHref(course.creator?.name)} className="text-secondary-400 hover:underline">
+                {course.creator?.name}
+              </Link>
             </p>
 
             <ul className="mt-4 flex flex-wrap gap-3">
@@ -135,17 +138,17 @@ export default function CourseDetails({ slug }: { slug: string }) {
         </header>
 
         {/* ── Video ────────────────────────────────────────── */}
-        <div className="row-start-2 pb-8 md:pb-[62px] lg:col-span-7">
+        <div className="col-[1/-1] row-start-2 pb-8 md:pb-[62px] lg:col-[1/span_7]">
           <CourseVideo thumbnail={course.thumbnail} video={course.preview_video} title={course.title} />
         </div>
 
         {/* ── Side card (spans into the white area on desktop) ── */}
-        <div className="row-start-3 lg:col-span-5 lg:col-start-8 lg:row-span-2 lg:row-start-2 xl:col-span-4 xl:col-start-9">
-          <CourseSideCard course={course} onEnroll={() => selectTab("lessons")} />
+        <div className="col-[1/-1] row-start-3 lg:col-[8/span_5] lg:row-[2/4] xl:w-full xl:max-w-[410px] xl:justify-self-end">
+          <CourseSideCard course={course} />
         </div>
 
         {/* ── Tabs ─────────────────────────────────────────── */}
-        <div className="row-start-4 pt-10 pb-16 md:pt-[62px] md:pb-[120px] lg:col-span-7 lg:row-start-3">
+        <div className="col-[1/-1] row-start-4 pt-10 pb-16 md:pt-[62px] md:pb-[120px] lg:col-[1/span_7] lg:row-start-3">
           <div role="tablist" aria-label="Course sections" className="flex gap-3">
             {TABS.map((t) => (
               <button

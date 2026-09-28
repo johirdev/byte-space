@@ -1,34 +1,45 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ChevronDown, Video } from "lucide-react";
-import type { ICourse } from "@/app/types";
+import { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Lock, Video } from "lucide-react";
+import { toast } from "react-toastify";
+import type { ICourse, IEnrollment } from "@/app/types";
+import { apiRequest } from "@/app/lib/apiClient";
+import { useAuthStore } from "@/store/authStore";
+import { EnrollActions } from "../../Shared/CartButtons";
 import { formatDuration } from "../../utils/course";
 
-const storageKey = (courseId?: string) => `bytespace:progress:${courseId}`;
-
 /**
- * Per-browser lesson completion. Kept in localStorage until learner accounts
- * exist — then this becomes an API call with the same shape.
+ * Lesson completion for enrolled learners, stored on their enrollment.
+ * Toggles update the UI instantly and are saved (debounced) to the API.
  */
-function useLessonProgress(courseId: string | undefined, total: number) {
-  const [done, setDone] = useState<string[]>(() => {
-    try {
-      const raw = window.localStorage.getItem(storageKey(courseId));
-      return raw ? (JSON.parse(raw) as string[]) : [];
-    } catch {
-      return [];
-    }
-  });
+function useLessonProgress(courseId: string | undefined, total: number, enabled: boolean) {
+  const [done, setDone] = useState<string[]>([]);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!enabled || !courseId) return;
+    apiRequest<IEnrollment>(`/users/me/enrollments/${courseId}`, { auth: "user" })
+      .then(({ data }) => setDone(data.completed_lessons ?? []))
+      .catch(() => {});
+  }, [enabled, courseId]);
+
+  useEffect(() => () => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+  }, []);
 
   const toggle = (key: string) => {
+    if (!enabled) return;
     setDone((prev) => {
       const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
-      try {
-        window.localStorage.setItem(storageKey(courseId), JSON.stringify(next));
-      } catch {
-        /* storage blocked — progress still works for this visit */
-      }
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => {
+        apiRequest(`/users/me/enrollments/${courseId}`, {
+          method: "PATCH",
+          body: { completed_lessons: next },
+          auth: "user",
+        }).catch(() => toast.error("Couldn't save your progress — check your connection"));
+      }, 600);
       return next;
     });
   };
@@ -38,7 +49,8 @@ function useLessonProgress(courseId: string | undefined, total: number) {
 }
 
 export default function LessonsTab({ course }: { course: ICourse }) {
-  const { done, toggle, percent } = useLessonProgress(course._id, course.total_lessons);
+  const enrolled = useAuthStore((s) => s.isEnrolled(course._id));
+  const { done, toggle, percent } = useLessonProgress(course._id, course.total_lessons, enrolled);
   const [openModule, setOpenModule] = useState<number | null>(null);
 
   return (
@@ -97,21 +109,26 @@ export default function LessonsTab({ course }: { course: ICourse }) {
                         const complete = done.includes(key);
                         return (
                           <li key={key}>
-                            <label className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-neutral-50">
-                              <input
-                                type="checkbox"
-                                checked={complete}
-                                onChange={() => toggle(key)}
-                                className="peer sr-only"
-                              />
-                              <span
-                                className={`grid size-5 shrink-0 place-items-center rounded-full border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary-600 ${
-                                  complete ? "border-primary-600 bg-primary-600 text-white" : "border-neutral-300"
-                                }`}
-                                aria-hidden="true"
-                              >
-                                {complete && <Check className="size-3" />}
-                              </span>
+                            <label
+                              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
+                                enrolled ? "cursor-pointer hover:bg-neutral-50" : ""
+                              }`}
+                            >
+                              {enrolled ? (
+                                <>
+                                  <input type="checkbox" checked={complete} onChange={() => toggle(key)} className="peer sr-only" />
+                                  <span
+                                    className={`grid size-5 shrink-0 place-items-center rounded-full border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary-600 ${
+                                      complete ? "border-primary-600 bg-primary-600 text-white" : "border-neutral-300"
+                                    }`}
+                                    aria-hidden="true"
+                                  >
+                                    {complete && <Check className="size-3" />}
+                                  </span>
+                                </>
+                              ) : (
+                                <Lock className="size-4 shrink-0 text-neutral-300" aria-label={lesson.is_preview ? "Free preview" : "Locked"} />
+                              )}
                               <span className={`flex-1 ${complete ? "text-neutral-400 line-through" : "text-neutral-700"}`}>
                                 {lesson.title}
                                 {lesson.is_preview && (
@@ -163,8 +180,18 @@ export default function LessonsTab({ course }: { course: ICourse }) {
             <div className="h-full rounded-full bg-secondary-400 transition-[width] duration-500" style={{ width: `${percent}%` }} />
           </div>
           <p className="mt-2 text-xs text-neutral-400">
-            {done.length} of {course.total_lessons} lessons completed — open a module and tick lessons as you finish them.
+            {enrolled
+              ? `${done.length} of ${course.total_lessons} lessons completed — open a module and tick lessons as you finish them.`
+              : "Progress is saved to your account once you enroll."}
           </p>
+          {!enrolled && (
+            <div className="mt-4 rounded-xl bg-neutral-50 p-4">
+              <p className="flex items-center gap-2 text-sm text-neutral-700">
+                <Lock className="size-4" aria-hidden="true" /> Enroll to unlock progress tracking
+              </p>
+              <EnrollActions course={course} />
+            </div>
+          )}
         </div>
       </section>
     </div>

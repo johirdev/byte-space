@@ -2,6 +2,9 @@ import { isValidObjectId, type SortOrder, Types } from "mongoose";
 import { CourseModel } from "../models/course.model";
 import { CourseCategoryModel } from "../models/courseCategory.model";
 import { CourseReviewModel } from "../models/courseReview.model";
+import { EnrollmentModel } from "../models/enrollment.model";
+import { OrderModel } from "../models/order.model";
+import { UserModel } from "../models/user.model";
 import {
   COURSE_LEVELS,
   COURSE_SORTS,
@@ -29,6 +32,7 @@ import {
   strList,
 } from "../lib/validate";
 import { findCategory } from "./courseCategory.service";
+import { creatorNameForSlug } from "./creator.service";
 
 type CourseRow = ICourse & { _id: string };
 
@@ -291,6 +295,10 @@ export type CourseListArgs = {
   sort?: string | null;
   page?: number;
   limit?: number;
+  /** Comma-separated course ids (cart re-validation). */
+  ids?: string | null;
+  /** Creator slug — only that creator's courses. */
+  creator?: string | null;
   /** Admin callers see drafts and may filter by status. */
   admin?: boolean;
 };
@@ -307,6 +315,16 @@ export const listCourses = async (
   } else if (args.status && COURSE_STATUSES.includes(args.status as CourseStatus)) {
     filter.status = args.status;
   }
+
+  const creatorKey = str(args.creator);
+  if (creatorKey) {
+    const name = await creatorNameForSlug(creatorKey);
+    if (!name) return { data: [], meta: buildMeta(0, page, limit) };
+    filter["creator.name"] = name;
+  }
+
+  const ids = strList(args.ids).filter((id) => isValidObjectId(id)).slice(0, 50);
+  if (ids.length) filter._id = { $in: ids };
 
   const q = str(args.q);
   if (q) {
@@ -401,6 +419,7 @@ export const deleteCourse = async (id: string): Promise<ICourse> => {
   await Promise.all([
     CourseModel.deleteOne({ _id: id }),
     CourseReviewModel.deleteMany({ course: id }),
+    EnrollmentModel.deleteMany({ course: id }),
   ]);
   return course;
 };
@@ -438,6 +457,11 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     recentCourses,
     topRated,
     recentReviews,
+    usersTotal,
+    newUsers,
+    enrollmentsTotal,
+    salesAgg,
+    recentOrders,
   ] = await Promise.all([
     CourseModel.countDocuments(),
     CourseModel.countDocuments({ status: "published" }),
@@ -480,6 +504,14 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       .sort({ createdAt: -1 })
       .limit(5)
       .lean(),
+    UserModel.countDocuments(),
+    UserModel.countDocuments({ createdAt: { $gte: new Date(Date.now() - 30 * 864e5) } }),
+    EnrollmentModel.countDocuments(),
+    OrderModel.aggregate<{ orders: number; revenue: number }>([
+      { $match: { status: "paid" } },
+      { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: "$total" } } },
+    ]),
+    OrderModel.find().sort({ createdAt: -1 }).limit(5).lean(),
   ]);
 
   return JSON.parse(
@@ -496,6 +528,14 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       recentCourses,
       topRated,
       recentReviews,
+      learners: {
+        users: usersTotal,
+        newUsers,
+        enrollments: enrollmentsTotal,
+        orders: salesAgg[0]?.orders ?? 0,
+        revenue: Math.round((salesAgg[0]?.revenue ?? 0) * 100) / 100,
+      },
+      recentOrders,
     }),
   ) as DashboardStats;
 };

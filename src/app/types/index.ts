@@ -26,6 +26,7 @@ export type ApiResponse<T> = {
 };
 
 export * from "./course.interface";
+export * from "./user.interface";
 
 /* ── Admin ───────────────────────────────────────────────────────────── */
 export const ADMIN_ROLES = [
