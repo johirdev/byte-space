@@ -1,8 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
-import { BarChart3, Filter, ListFilter, SearchX, Shapes } from "lucide-react";
+import {
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  ListFilter,
+  SearchX,
+  Shapes,
+} from "lucide-react";
 import { apiRequest, buildQuery, ApiClientError } from "@/app/lib/apiClient";
 import {
   COURSE_LEVELS,
@@ -52,7 +68,16 @@ const RATING_OPTIONS = [
 ];
 
 const SearchIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 18 18"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    aria-hidden="true"
+  >
     <circle cx="7.5" cy="7.5" r="6" />
     <path d="M12 12l4.5 4.5" />
   </svg>
@@ -70,9 +95,16 @@ const toQuery = (f: CourseFilters) =>
     page: f.page > 1 ? f.page : "",
   });
 
-export default function Courses({ initial }: { initial?: Partial<CourseFilters> }) {
+export default function Courses({
+  initial,
+}: {
+  initial?: Partial<CourseFilters>;
+}) {
   const router = useRouter();
-  const [filters, setFilters] = useState<CourseFilters>({ ...EMPTY, ...initial });
+  const [filters, setFilters] = useState<CourseFilters>({
+    ...EMPTY,
+    ...initial,
+  });
   const [searchInput, setSearchInput] = useState(filters.q);
 
   const [categories, setCategories] = useState<ICourseCategory[]>([]);
@@ -89,7 +121,9 @@ export default function Courses({ initial }: { initial?: Partial<CourseFilters> 
   // Categories for the chips and dropdowns — loaded once.
   useEffect(() => {
     const controller = new AbortController();
-    apiRequest<ICourseCategory[]>("/course-categories", { signal: controller.signal })
+    apiRequest<ICourseCategory[]>("/course-categories", {
+      signal: controller.signal,
+    })
       .then(({ data }) => setCategories(data ?? []))
       .catch(() => {});
     return () => controller.abort();
@@ -132,7 +166,11 @@ export default function Courses({ initial }: { initial?: Partial<CourseFilters> 
         setMeta(m);
       } catch (err) {
         if ((err as Error)?.name === "AbortError") return;
-        setError(err instanceof ApiClientError ? err.message : "Could not load courses");
+        setError(
+          err instanceof ApiClientError
+            ? err.message
+            : "Could not load courses",
+        );
         setCourses([]);
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -145,15 +183,23 @@ export default function Courses({ initial }: { initial?: Partial<CourseFilters> 
   const categoryOptions = useMemo(
     () => [
       { value: "", label: "All categories" },
-      ...categories.map((c) => ({ value: c.slug, label: `${c.name} (${c.course_count ?? 0})` })),
+      ...categories.map((c) => ({
+        value: c.slug,
+        label: `${c.name} (${c.course_count ?? 0})`,
+      })),
     ],
     [categories],
   );
 
   const activeCategory = categories.find((c) => c.slug === filters.category);
-  const extraFilters = Number(Boolean(filters.price)) + Number(Boolean(filters.rating));
+  const extraFilters =
+    Number(Boolean(filters.price)) + Number(Boolean(filters.rating));
   const hasFilters = Boolean(
-    filters.q || filters.category || filters.level || filters.price || filters.rating,
+    filters.q ||
+    filters.category ||
+    filters.level ||
+    filters.price ||
+    filters.rating,
   );
 
   const goToPage = (page: number) => {
@@ -210,7 +256,10 @@ export default function Courses({ initial }: { initial?: Partial<CourseFilters> 
       </section>
 
       {/* ── Filters ──────────────────────────────────────────── */}
-      <section ref={resultsRef} className="container-site scroll-mt-4 pt-10 md:pt-[52px]">
+      <section
+        ref={resultsRef}
+        className="container-site scroll-mt-4 pt-10 md:pt-[52px]"
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <Dropdown
@@ -256,7 +305,10 @@ export default function Courses({ initial }: { initial?: Partial<CourseFilters> 
               label={filters.level || "Level"}
               value={filters.level}
               icon={<BarChart3 className="size-4" aria-hidden="true" />}
-              options={[{ value: "", label: "All levels" }, ...COURSE_LEVELS.map((l) => ({ value: l, label: l }))]}
+              options={[
+                { value: "", label: "All levels" },
+                ...COURSE_LEVELS.map((l) => ({ value: l, label: l })),
+              ]}
               onChange={(level) => update({ level })}
             />
 
@@ -270,9 +322,16 @@ export default function Courses({ initial }: { initial?: Partial<CourseFilters> 
           </div>
 
           <Dropdown
-            label={COURSE_SORT_LABELS[filters.sort as keyof typeof COURSE_SORT_LABELS] ?? "Most relevant"}
+            label={
+              COURSE_SORT_LABELS[
+                filters.sort as keyof typeof COURSE_SORT_LABELS
+              ] ?? "Most relevant"
+            }
             icon={<ListFilter className="size-4" aria-hidden="true" />}
-            options={COURSE_SORTS.map((s) => ({ value: s, label: COURSE_SORT_LABELS[s] }))}
+            options={COURSE_SORTS.map((s) => ({
+              value: s,
+              label: COURSE_SORT_LABELS[s],
+            }))}
             value={filters.sort === "relevant" ? "" : filters.sort}
             onChange={(sort) => update({ sort: sort || "relevant" })}
             align="right"
@@ -280,38 +339,50 @@ export default function Courses({ initial }: { initial?: Partial<CourseFilters> 
         </div>
 
         {/* Category chips — "Featured" is the default, featured-first view. */}
-        <div className="no-scrollbar -mx-[var(--grid-margin)] mt-6 overflow-x-auto px-[var(--grid-margin)] md:mt-7">
-          <ul className="flex w-max gap-3">
-            <li>
-              <Chip active={!filters.category} onClick={() => update({ category: "", sort: "relevant" })}>
-                Featured
-              </Chip>
-            </li>
-            {categories.map((category) => (
-              <li key={category._id}>
+        <div className="mt-6 md:mt-7">
+          <CategorySlider activeKey={filters.category}>
+            <ul className="flex w-max gap-3">
+              <li>
                 <Chip
-                  active={filters.category === category.slug}
-                  onClick={() => update({ category: category.slug })}
+                  active={!filters.category}
+                  onClick={() => update({ category: "", sort: "relevant" })}
                 >
-                  {category.name}
+                  Featured
                 </Chip>
               </li>
-            ))}
-          </ul>
+              {categories.map((category) => (
+                <li key={category._id}>
+                  <Chip
+                    active={filters.category === category.slug}
+                    onClick={() => update({ category: category.slug })}
+                  >
+                    {category.name}
+                  </Chip>
+                </li>
+              ))}
+            </ul>
+          </CategorySlider>
         </div>
 
         {hasFilters && !loading && meta && (
           <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-neutral-500">
             <span>
-              <strong className="font-medium text-neutral-950">{meta.total}</strong>{" "}
+              <strong className="font-medium text-neutral-950">
+                {meta.total}
+              </strong>{" "}
               {meta.total === 1 ? "course" : "courses"} found
               {filters.q && (
                 <>
-                  {" "}for “<span className="text-neutral-950">{filters.q}</span>”
+                  {" "}
+                  for “<span className="text-neutral-950">{filters.q}</span>”
                 </>
               )}
             </span>
-            <button type="button" onClick={clearAll} className="cursor-pointer font-medium text-primary-600 hover:underline">
+            <button
+              type="button"
+              onClick={clearAll}
+              className="cursor-pointer font-medium text-primary-600 hover:underline"
+            >
               Clear all
             </button>
           </div>
@@ -319,9 +390,18 @@ export default function Courses({ initial }: { initial?: Partial<CourseFilters> 
       </section>
 
       {/* ── Results ──────────────────────────────────────────── */}
-      <section className="container-site pt-8 pb-16 md:pt-10 md:pb-[120px]" aria-live="polite" aria-busy={loading}>
+      <section
+        className="container-site pt-8 pb-16 md:pt-10 md:pb-[120px]"
+        aria-live="polite"
+        aria-busy={loading}
+      >
         {error ? (
-          <EmptyState title="Something went wrong" text={error} action="Try again" onAction={() => setFilters((f) => ({ ...f }))} />
+          <EmptyState
+            title="Something went wrong"
+            text={error}
+            action="Try again"
+            onAction={() => setFilters((f) => ({ ...f }))}
+          />
         ) : loading && !courses.length ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
             {Array.from({ length: 6 }, (_, i) => (
@@ -349,11 +429,159 @@ export default function Courses({ initial }: { initial?: Partial<CourseFilters> 
 
         {meta && meta.totalPages > 1 && (
           <div className="mt-12 md:mt-16">
-            <Pagination page={filters.page} totalPages={meta.totalPages} onChange={goToPage} />
+            <Pagination
+              page={filters.page}
+              totalPages={meta.totalPages}
+              onChange={goToPage}
+            />
           </div>
         )}
       </section>
     </main>
+  );
+}
+
+/**
+ * Horizontally scrollable strip with:
+ * arrow buttons (desktop), drag-to-scroll, wheel → horizontal scroll,
+ * edge fades, and auto-centering of the active chip.
+ */
+function CategorySlider({
+  children,
+  activeKey,
+}: {
+  children: ReactNode;
+  activeKey: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [edge, setEdge] = useState({ left: false, right: false });
+  const drag = useRef({ down: false, startX: 0, startScroll: 0, moved: false });
+
+  const check = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    setEdge({
+      left: el.scrollLeft > 4,
+      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 4,
+    });
+  }, []);
+
+  // Re-check when the container or its content (categories loading) changes size.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    if (el.firstElementChild) ro.observe(el.firstElementChild);
+    return () => ro.disconnect();
+  }, [check]);
+
+  // Keep the active chip centered (scrolls only this strip, never the page).
+  useEffect(() => {
+    const el = ref.current;
+    const active = el?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!el || !active) return;
+    const target =
+      active.offsetLeft - (el.clientWidth - active.offsetWidth) / 2;
+    el.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [activeKey, children]);
+
+  // Vertical mouse wheel → horizontal scroll (only when the chips overflow).
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (
+        el.scrollWidth <= el.clientWidth ||
+        Math.abs(e.deltaY) <= Math.abs(e.deltaX)
+      )
+        return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  const scrollByDir = (dir: 1 | -1) =>
+    ref.current?.scrollBy({
+      left: dir * ref.current.clientWidth * 0.7,
+      behavior: "smooth",
+    });
+
+  const onMouseDown = (e: ReactMouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    drag.current = {
+      down: true,
+      startX: e.pageX,
+      startScroll: el.scrollLeft,
+      moved: false,
+    };
+  };
+  const onMouseMove = (e: ReactMouseEvent) => {
+    const d = drag.current;
+    const el = ref.current;
+    if (!d.down || !el) return;
+    const dx = e.pageX - d.startX;
+    if (Math.abs(dx) > 5) d.moved = true;
+    if (d.moved) el.scrollLeft = d.startScroll - dx;
+  };
+  const endDrag = () => {
+    drag.current.down = false;
+  };
+
+  return (
+    <div className="relative">
+      {edge.left && (
+        <>
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent" />
+          <button
+            type="button"
+            aria-label="Scroll categories left"
+            onClick={() => scrollByDir(-1)}
+            className="absolute top-1/2 left-0 z-20 hidden size-9 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-white shadow-md ring-1 ring-neutral-200 hover:bg-neutral-50 md:grid"
+          >
+            <ChevronLeft className="size-4" aria-hidden="true" />
+          </button>
+        </>
+      )}
+
+      <div
+        ref={ref}
+        onScroll={check}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={endDrag}
+        onMouseLeave={endDrag}
+        onClickCapture={(e) => {
+          // A drag shouldn't count as a chip click.
+          if (drag.current.moved) {
+            e.preventDefault();
+            e.stopPropagation();
+            drag.current.moved = false;
+          }
+        }}
+        className="no-scrollbar overflow-x-auto select-none md:cursor-grab md:active:cursor-grabbing"
+      >
+        {children}
+      </div>
+
+      {edge.right && (
+        <>
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent" />
+          <button
+            type="button"
+            aria-label="Scroll categories right"
+            onClick={() => scrollByDir(1)}
+            className="absolute top-1/2 right-0 z-20 hidden size-9 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-white shadow-md ring-1 ring-neutral-200 hover:bg-neutral-50 md:grid"
+          >
+            <ChevronRight className="size-4" aria-hidden="true" />
+          </button>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -364,16 +592,16 @@ function Chip({
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`h-10 cursor-pointer rounded-full font-medium px-4 text-sm whitespace-nowrap transition-colors ${
+      className={`h-10 cursor-pointer rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors ${
         active
-          ? "bg-secondary-400  text-neutral-950"
+          ? "bg-secondary-400 text-neutral-950"
           : "bg-neutral-50 text-neutral-700 hover:bg-neutral-100"
       }`}
     >
@@ -395,7 +623,9 @@ function FilterGroup({
 }) {
   return (
     <fieldset className="mb-3">
-      <legend className="mb-2 text-xs font-medium tracking-wide text-neutral-500 uppercase">{title}</legend>
+      <legend className="mb-2 text-xs font-medium tracking-wide text-neutral-500 uppercase">
+        {title}
+      </legend>
       <div className="flex flex-wrap gap-1.5">
         {options.map((option) => (
           <button

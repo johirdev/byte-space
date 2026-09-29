@@ -32,8 +32,14 @@ export default function TestimonialsSlider({ items }: { items: ITestimonial[] })
   return (
     <LazyMotion features={domAnimation} strict>
       <MotionConfig reducedMotion="user">
-        <section aria-labelledby="testimonials-heading" className="tm-section relative isolate overflow-hidden py-16 md:py-20">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+        <section
+          aria-labelledby="testimonials-heading"
+          className="tm-section relative isolate overflow-hidden py-16 md:py-20"
+        >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10"
+          >
             <span className="tm-glow tm-glow--lime-center" />
             <span className="tm-glow tm-glow--lime-right" />
             <span className="tm-glow tm-glow--blue-left" />
@@ -55,11 +61,15 @@ export default function TestimonialsSlider({ items }: { items: ITestimonial[] })
               >
                 Discover What Our Community Is Saying
               </m.h2>
-              <m.p variants={fadeUp} className="text-base leading-[1.6] text-neutral-600 md:text-lg">
-                At ByteSpace, our vibrant community of learners and creators is at the heart of what we do. Hear directly
-                from those who have experienced the transformative journey of learning and creating on our platform.
-                Explore testimonials that reflect the diverse perspectives of enthusiastic learners and accomplished
-                creators.
+              <m.p
+                variants={fadeUp}
+                className="text-base leading-[1.6] text-neutral-600 md:text-lg"
+              >
+                At ByteSpace, our vibrant community of learners and creators is
+                at the heart of what we do. Hear directly from those who have
+                experienced the transformative journey of learning and creating
+                on our platform. Explore testimonials that reflect the diverse
+                perspectives of enthusiastic learners and accomplished creators.
               </m.p>
             </m.div>
 
@@ -75,15 +85,30 @@ export default function TestimonialsSlider({ items }: { items: ITestimonial[] })
                 modules={[A11y, Autoplay, Keyboard]}
                 className="tm-swiper !overflow-visible"
                 onSwiper={setSwiper}
-                onSlideChange={(s) => setActive(loop ? s.realIndex : s.activeIndex)}
-                onBreakpoint={(s) => setPerView(Number(s.params.slidesPerView) || 1)}
+                onSlideChange={(s) =>
+                  setActive(loop ? s.realIndex : s.activeIndex)
+                }
+                onBreakpoint={(s) =>
+                  setPerView(Number(s.params.slidesPerView) || 1)
+                }
                 onInit={(s) => setPerView(Number(s.params.slidesPerView) || 1)}
                 loop={loop}
                 speed={700}
                 grabCursor
                 keyboard={{ enabled: true, onlyInViewport: true }}
-                autoplay={items.length > 1 ? { delay: 5500, disableOnInteraction: false, pauseOnMouseEnter: true } : false}
-                a11y={{ prevSlideMessage: "Previous testimonial", nextSlideMessage: "Next testimonial" }}
+                autoplay={
+                  items.length > 1
+                    ? {
+                        delay: 5500,
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: true,
+                      }
+                    : false
+                }
+                a11y={{
+                  prevSlideMessage: "Previous testimonial",
+                  nextSlideMessage: "Next testimonial",
+                }}
                 slidesPerView={1}
                 spaceBetween={20}
                 breakpoints={{
@@ -97,33 +122,6 @@ export default function TestimonialsSlider({ items }: { items: ITestimonial[] })
                   </SwiperSlide>
                 ))}
               </Swiper>
-
-              {/* Controls — only when there is something to scroll to */}
-              {scrollable && (
-                <div className="mt-10 flex items-center justify-center gap-5">
-                  <ArrowButton label="Previous testimonial" onClick={() => swiper?.slidePrev()} disabled={!loop && active === 0}>
-                    <ChevronLeft className="size-5" />
-                  </ArrowButton>
-                  <div className="flex items-center gap-2" role="tablist" aria-label="Choose testimonial">
-                    {Array.from({ length: pages }, (_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        role="tab"
-                        aria-selected={i === active}
-                        aria-label={`Show testimonial ${i + 1}`}
-                        onClick={() => (loop ? swiper?.slideToLoop(i) : swiper?.slideTo(i))}
-                        className={`h-2 cursor-pointer rounded-full transition-all duration-500 ${
-                          i === active ? "w-8 bg-primary-600" : "w-2 bg-neutral-300 hover:bg-neutral-400"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <ArrowButton label="Next testimonial" onClick={() => swiper?.slideNext()} disabled={!loop && active >= pages - 1}>
-                    <ChevronRight className="size-5" />
-                  </ArrowButton>
-                </div>
-              )}
             </m.div>
           </div>
         </section>
@@ -145,26 +143,4 @@ function TestimonialCard({ item }: { item: ITestimonial }) {
   );
 }
 
-function ArrowButton({
-  label,
-  onClick,
-  disabled,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      disabled={disabled}
-      className="grid size-11 cursor-pointer place-items-center rounded-full border border-neutral-200 bg-white text-neutral-950 transition-all hover:border-neutral-950 hover:bg-neutral-950 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-neutral-950"
-    >
-      {children}
-    </button>
-  );
-}
+

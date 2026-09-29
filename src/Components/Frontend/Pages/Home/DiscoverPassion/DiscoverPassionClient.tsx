@@ -10,7 +10,7 @@ import CoursesCard, { CoursesCardSkeleton } from "@/Components/Frontend/Card/Cou
 /** Courses shown in the grid; more than this reveals "See More Courses". */
 export const PAGE_SIZE = 9;
 /** Category chips shown before "+ More". */
-const VISIBLE_CATEGORIES = 17;
+const VISIBLE_CATEGORIES = 16;
 
 export default function DiscoverPassionClient({
   categories,
@@ -41,7 +41,12 @@ export default function DiscoverPassionClient({
       try {
         const { data, meta } = await apiRequest<ICourse[]>("/courses", {
           signal: controller.signal,
-          query: { category: active, sort: "relevant", page: 1, limit: PAGE_SIZE },
+          query: {
+            category: active,
+            sort: "relevant",
+            page: 1,
+            limit: PAGE_SIZE,
+          },
         });
         setCourses(data ?? []);
         setTotal(meta?.total ?? data.length);
@@ -63,10 +68,15 @@ export default function DiscoverPassionClient({
     ? categories
     : categories.filter((c, i) => i < VISIBLE_CATEGORIES || c.slug === active);
   const activeName = categories.find((c) => c.slug === active)?.name;
-  const seeMoreHref = active ? `/courses?category=${encodeURIComponent(active)}` : "/courses";
+  const seeMoreHref = active
+    ? `/courses?category=${encodeURIComponent(active)}`
+    : "/courses";
 
   return (
-    <section aria-labelledby="discover-heading" className="bg-white py-16 md:py-[100px] xl:py-[120px]">
+    <section
+      aria-labelledby="discover-heading"
+      className="bg-white py-16 md:py-[100px] xl:py-[120px]"
+    >
       <div className="container-site">
         {/* Heading */}
         <div className="mx-auto max-w-[920px] text-center">
@@ -79,8 +89,10 @@ export default function DiscoverPassionClient({
             Build Your Skills
           </h2>
           <p className="mx-auto mt-4 max-w-[900px] text-base leading-[1.6] text-neutral-500 md:mt-5 md:text-lg">
-            At Bytespace Courses, we bring you closer to life-changing knowledge. Explore a variety of courses across
-            different fields, from technology to the arts, and make a difference in your career and life.
+            At Bytespace Courses, we bring you closer to life-changing
+            knowledge. Explore a variety of courses across different fields,
+            from technology to the arts, and make a difference in your career
+            and life.
           </p>
         </div>
 
@@ -96,7 +108,10 @@ export default function DiscoverPassionClient({
           </li>
           {shown.map((category) => (
             <li key={category._id}>
-              <Chip active={active === category.slug} onClick={() => setActive(category.slug)}>
+              <Chip
+                active={active === category.slug}
+                onClick={() => setActive(category.slug)}
+              >
                 {category.name}
               </Chip>
             </li>
@@ -107,7 +122,7 @@ export default function DiscoverPassionClient({
                 type="button"
                 onClick={() => setExpanded((v) => !v)}
                 aria-expanded={expanded}
-                className="h-10 cursor-pointer px-2 text-sm text-primary-600 transition-colors hover:text-primary-800 md:text-base"
+                className="h-10 cursor-pointer px-2 text-sm text-primary-600 transition-colors hover:text-primary-800 md:text-base font-medium"
               >
                 {expanded ? "− Less" : `+ More`}
               </button>
@@ -116,7 +131,11 @@ export default function DiscoverPassionClient({
         </ul>
 
         {/* Course grid */}
-        <div className="mt-12 md:mt-[72px]" aria-live="polite" aria-busy={loading}>
+        <div
+          className="mt-12 md:mt-[72px]"
+          aria-live="polite"
+          aria-busy={loading}
+        >
           {loading && courses.length === 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
               {Array.from({ length: 3 }, (_, i) => (
@@ -127,10 +146,14 @@ export default function DiscoverPassionClient({
             <div className="flex flex-col items-center rounded-2xl border border-dashed border-neutral-200 px-6 py-16 text-center">
               <SearchX className="size-7 text-neutral-300" aria-hidden="true" />
               <p className="mt-3 font-heading text-lg font-semibold text-neutral-950">
-                {activeName ? `No ${activeName} courses yet` : "Courses are on their way"}
+                {activeName
+                  ? `No ${activeName} courses yet`
+                  : "Courses are on their way"}
               </p>
               <p className="mt-1 text-sm text-neutral-500">
-                {activeName ? "Try another category — new courses are added regularly." : "Check back soon."}
+                {activeName
+                  ? "Try another category — new courses are added regularly."
+                  : "Check back soon."}
               </p>
             </div>
           ) : (
@@ -157,7 +180,10 @@ export default function DiscoverPassionClient({
             >
               See More Courses
               <span className="text-base text-neutral-700">({total})</span>
-              <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              <ArrowRight
+                className="size-5 transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
             </Link>
           </div>
         )}

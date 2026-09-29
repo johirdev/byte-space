@@ -36,7 +36,10 @@ const PATHS: Path[] = [
  */
 export const DiverseLearningPath = () => {
   return (
-    <section aria-labelledby="paths-heading" className="bg-white pb-16 md:pb-[100px] xl:pb-[120px]">
+    <section
+      aria-labelledby="paths-heading"
+      className="bg-white pb-16 md:pb-[100px] xl:pb-[120px]"
+    >
       <div className="container-site">
         <div className="mx-auto max-w-[940px] text-center">
           <h2
@@ -46,9 +49,10 @@ export const DiverseLearningPath = () => {
             Explore Diverse Learning Paths at Bytespace
           </h2>
           <p className="mx-auto mt-4 text-base leading-[1.6] text-neutral-500 md:text-lg">
-            At Bytespace, we believe in empowering individuals through knowledge. Our diverse range of courses spans
-            various fields, ensuring there&apos;s something for everyone. Unleash your potential and explore our
-            carefully curated categories.
+            At Bytespace, we believe in empowering individuals through
+            knowledge. Our diverse range of courses spans various fields,
+            ensuring there&apos;s something for everyone. Unleash your potential
+            and explore our carefully curated categories.
           </p>
         </div>
 
@@ -57,12 +61,18 @@ export const DiverseLearningPath = () => {
             <li key={label}>
               <Link
                 href={href}
-                className="group flex aspect-square flex-col items-center justify-center gap-4 rounded-2xl border border-neutral-200 bg-white p-3 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary-600 hover:shadow-card-hover focus-visible:border-primary-600 md:gap-5"
+                className="group flex aspect-square flex-col items-center justify-center gap-4 rounded-2xl border border-neutral-200 bg-white p-3 text-center transition-all duration-300 hover:-translate-y-1  hover:shadow-card-hover focus-visible:border-primary-600 md:gap-5"
               >
-                <span className="grid size-12 place-items-center rounded-full bg-secondary-400 text-neutral-950 transition-transform duration-300 group-hover:scale-110">
-                  <Icon className="size-6" strokeWidth={2.2} aria-hidden="true" />
+                <span className="grid size-15 place-items-center rounded-full bg-secondary-400 text-neutral-950 transition-transform duration-300 group-hover:scale-110">
+                  <Icon
+                    className="size-9"
+                    strokeWidth={2.2}
+                    aria-hidden="true"
+                  />
                 </span>
-                <span className="text-base leading-tight text-neutral-950 md:text-lg">{label}</span>
+                <span className="text-base leading-tight text-neutral-950 md:text-[20px] font-[500]">
+                  {label}
+                </span>
               </Link>
             </li>
           ))}

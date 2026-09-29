@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Navbar from "@/Layout/Navbar/Navbar";
 import SiteProviders from "@/Layout/SiteProviders";
+import Footer from "@/Layout/Footer/Footer";
 
 /**
  * 404 (claude/404/404.png), built 1:1 against the 1440px frame:
@@ -36,6 +37,7 @@ export default function NotFound() {
             Back to Home
           </Link>
         </main>
+        <Footer />
       </div>
     </SiteProviders>
   );
