@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/config/seo";
 import Courses, { type CourseFilters } from "@/Components/Frontend/Pages/Courses/Courses";
 
-export const metadata: Metadata = {
-  title: "Find Your Next Course | ByteSpace",
-  description: "Browse, search and filter ByteSpace courses by category, level, price and rating.",
-};
+// Filters live in the query string; the canonical stays on /courses so
+// every filtered variant consolidates into one indexable page.
+export const metadata: Metadata = pageMetadata({
+  title: "Browse Online Courses",
+  description:
+    "Search and filter ByteSpace courses by category, level, price and rating. Learn design, development, marketing and business from verified creators.",
+  path: "/courses",
+});
 
 const first = (value: string | string[] | undefined) =>
   (Array.isArray(value) ? value[0] : value) ?? "";

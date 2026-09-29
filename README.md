@@ -5,7 +5,9 @@
 
 ByteSpace connects **verified creators** who teach with **learners** who want practical skills. Learners browse, buy and track courses; creators apply and get verified; admins run everything from one dashboard.
 
-**Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · MongoDB + Mongoose · JWT auth · Zustand · Motion · Swiper · imgbb
+🌐 **Live site:** **[bytespacebd.vercel.app](https://bytespacebd.vercel.app)** · 🛠️ **Admin panel:** [bytespacebd.vercel.app/dashboard](https://bytespacebd.vercel.app/dashboard)
+
+**Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · MongoDB + Mongoose · JWT auth · Zustand · Motion · Swiper · imgbb · deployed on Vercel
 
 ---
 
@@ -13,7 +15,7 @@ ByteSpace connects **verified creators** who teach with **learners** who want pr
 
 | | |
 |---|---|
-| **Admin panel** | [`/dashboard`](http://localhost:3000/dashboard) — locally `http://localhost:3000/dashboard` |
+| **Admin panel** | [bytespacebd.vercel.app/dashboard](https://bytespacebd.vercel.app/dashboard) — locally `http://localhost:3000/dashboard` |
 | **Email** | `admin@gmail.com` |
 | **Password** | `12345678` |
 
@@ -115,6 +117,25 @@ src/
 
 ---
 
+## 🔍 SEO & production setup
+
+| What | Where |
+|---|---|
+| **One source of truth** for the site name, URL, description, keywords and theme colour | `src/config/site.ts` |
+| **Per-page metadata helper** — canonical URL, Open Graph and Twitter cards on every page | `src/config/seo.ts` → `pageMetadata()` |
+| **Title template** — pages set a short title, the brand is appended (`Browse Online Courses \| ByteSpace`) | `src/app/layout.tsx` |
+| **Dynamic `sitemap.xml`** — static pages + every published course and creator, refreshed hourly | `src/app/sitemap.ts` |
+| **`robots.txt`** — blocks `/dashboard`, `/api`, cart, checkout and profile | `src/app/robots.ts` |
+| **Generated social card** (1200×630) for link previews | `src/app/opengraph-image.tsx` |
+| **Web app manifest** | `src/app/manifest.ts` |
+| **Structured data (JSON-LD)** — Organization + WebSite search box (home), Course + Breadcrumb (course pages), ProfilePage (creators), FAQPage (FAQ) | `src/Components/Shared/JsonLd.tsx` |
+| **noindex** on private screens (cart, checkout, profile, become-creator) and an `X-Robots-Tag` header on `/dashboard` and `/api` | page metadata + `next.config.ts` |
+| **Security headers** — `nosniff`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`; `X-Powered-By` removed | `next.config.ts` |
+
+Check it live: [`/sitemap.xml`](https://bytespacebd.vercel.app/sitemap.xml) · [`/robots.txt`](https://bytespacebd.vercel.app/robots.txt) · [`/opengraph-image`](https://bytespacebd.vercel.app/opengraph-image)
+
+---
+
 ## 🛠️ Admin panel
 
 Open **`/dashboard`** and sign in. Roles: **superadmin** (everything), **admin**, **editor** (content), **view only** (read-only).
@@ -186,9 +207,18 @@ Then run:
 
 ```bash
 npm run dev      # http://localhost:3000
+npm run build    # production build (type-checks the whole project)
+npm start        # serve the production build
 ```
 
 On an empty database, the first admin account you create becomes the **superadmin**.
+
+### Deploying to Vercel
+
+1. Import the repository in Vercel (framework preset: **Next.js**).
+2. Add every variable from the `.env` block above under **Project → Settings → Environment Variables**, with `NEXT_PUBLIC_SITE_URL=https://bytespacebd.vercel.app` (or your custom domain). Canonical URLs, the sitemap and social cards are built from it.
+3. In MongoDB Atlas → Network Access, allow Vercel to connect (`0.0.0.0/0`, or Vercel's static IPs on paid plans).
+4. Deploy, then submit `https://<your-domain>/sitemap.xml` in Google Search Console.
 
 ---
 
@@ -197,7 +227,7 @@ On an empty database, the first admin account you create becomes the **superadmi
 - **Payments are a demo.** Nothing is charged; card `4242 4242 4242 4242` succeeds and `4000 0000 0000 0002` is declined.
 - **“AI auto-fill” is template-based.** There's no LLM key in the project, so it uses category-aware templates. It lives in one function (`services/courseAutofill.service.ts`) and can be swapped for a real model without touching the UI.
 - **Follow and follower counts are demo only.** Follows are saved in the browser.
-- **Known issue:** `src/app/lib/pageData.ts` and `src/Components/Dashboard/Profile/ProfileSettings.tsx` are leftovers from an earlier template and still have TypeScript errors, so `next build` fails until they're fixed or removed. `npm run dev` works normally.
+- **Template leftovers:** `src/app/lib/pageData.ts` and `src/app/lib/defaults.ts` come from an earlier template and nothing imports them. They're excluded in `tsconfig.json` so the build stays green, and they can be deleted safely.
 
 ---
 

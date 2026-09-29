@@ -5,11 +5,23 @@ import { toast } from "react-toastify";
 import { RefreshCw, Save, TriangleAlert } from "lucide-react";
 import { AuthContext } from "@/app/dashboard/AuthProvider";
 import { apiRequest, ApiClientError } from "@/app/lib/apiClient";
-import { SOCIAL_PLATFORMS } from "@/app/components/ui/SocialIcon";
 import PageHeader from "../kit/PageHeader";
 import { Field } from "../kit/Fields";
 import type { FieldDef, FormValues } from "../kit/types";
-import type { IProfile } from "@/app/types";
+
+/** Platforms offered in the social links picker. */
+const SOCIAL_PLATFORMS = [
+  "facebook",
+  "instagram",
+  "linkedin",
+  "twitter",
+  "youtube",
+  "tiktok",
+  "github",
+  "behance",
+  "dribbble",
+  "website",
+] as const;
 
 /** Tabs keep this very large singleton form navigable. */
 const TABS = [
@@ -26,7 +38,12 @@ type TabId = (typeof TABS)[number]["id"];
 const SECTIONS: Record<TabId, FieldDef[]> = {
   identity: [
     { name: "full_name", label: "Full name", type: "text", required: true },
-    { name: "short_name", label: "Short name", type: "text", placeholder: "Nafi" },
+    {
+      name: "short_name",
+      label: "Short name",
+      type: "text",
+      placeholder: "Nafi",
+    },
     {
       name: "headline",
       label: "Hero headline",
@@ -60,7 +77,12 @@ const SECTIONS: Record<TabId, FieldDef[]> = {
       hint: "Shown as the About section subtitle.",
     },
     { name: "avatar", label: "Portrait URL", type: "image", span: 2 },
-    { name: "resume_url", label: "CV / resume URL", type: "text", placeholder: "/anamul_hasan_rafi.pdf" },
+    {
+      name: "resume_url",
+      label: "CV / resume URL",
+      type: "text",
+      placeholder: "/anamul_hasan_rafi.pdf",
+    },
     {
       name: "intro_video_url",
       label: "Intro video URL",
@@ -87,8 +109,20 @@ const SECTIONS: Record<TabId, FieldDef[]> = {
       addLabel: "Add a stat",
       hint: "Exactly four reads best. Numbers count up when they scroll into view.",
       fields: [
-        { name: "value", label: "Value", type: "text", required: true, placeholder: "4.3x" },
-        { name: "label", label: "Label", type: "text", required: true, placeholder: "Average blended ROAS" },
+        {
+          name: "value",
+          label: "Value",
+          type: "text",
+          required: true,
+          placeholder: "4.3x",
+        },
+        {
+          name: "label",
+          label: "Label",
+          type: "text",
+          required: true,
+          placeholder: "Average blended ROAS",
+        },
       ],
     },
     {
@@ -99,7 +133,14 @@ const SECTIONS: Record<TabId, FieldDef[]> = {
       addLabel: "Add a skill",
       fields: [
         { name: "label", label: "Skill", type: "text", required: true },
-        { name: "level", label: "Level (0–100)", type: "number", required: true, min: 0, max: 100 },
+        {
+          name: "level",
+          label: "Level (0–100)",
+          type: "number",
+          required: true,
+          min: 0,
+          max: 100,
+        },
       ],
     },
     {
@@ -122,7 +163,14 @@ const SECTIONS: Record<TabId, FieldDef[]> = {
       hint: "Five steps fit the desktop rail exactly.",
       fields: [
         { name: "title", label: "Step title", type: "text", required: true },
-        { name: "description", label: "Description", type: "textarea", required: true, span: 2, rows: 2 },
+        {
+          name: "description",
+          label: "Description",
+          type: "textarea",
+          required: true,
+          span: 2,
+          rows: 2,
+        },
       ],
     },
   ],
@@ -136,8 +184,19 @@ const SECTIONS: Record<TabId, FieldDef[]> = {
       addLabel: "Add a role",
       fields: [
         { name: "title", label: "Role", type: "text", required: true },
-        { name: "organization", label: "Company", type: "text", required: true },
-        { name: "period", label: "Period", type: "text", required: true, placeholder: "2023 — Present" },
+        {
+          name: "organization",
+          label: "Company",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "period",
+          label: "Period",
+          type: "text",
+          required: true,
+          placeholder: "2023 — Present",
+        },
         { name: "description", label: "Summary", type: "text" },
       ],
     },
@@ -149,7 +208,12 @@ const SECTIONS: Record<TabId, FieldDef[]> = {
       addLabel: "Add a qualification",
       fields: [
         { name: "title", label: "Qualification", type: "text", required: true },
-        { name: "organization", label: "Institution", type: "text", required: true },
+        {
+          name: "organization",
+          label: "Institution",
+          type: "text",
+          required: true,
+        },
         { name: "period", label: "Period", type: "text", required: true },
         { name: "description", label: "Summary", type: "text" },
       ],
@@ -171,9 +235,24 @@ const SECTIONS: Record<TabId, FieldDef[]> = {
 
   contact: [
     { name: "email", label: "Email", type: "email", required: true },
-    { name: "phone", label: "Phone", type: "text", placeholder: "+8801700000000" },
-    { name: "whatsapp", label: "WhatsApp number", type: "text", placeholder: "+8801700000000" },
-    { name: "location", label: "Location", type: "text", placeholder: "Dhaka, Bangladesh · Working worldwide" },
+    {
+      name: "phone",
+      label: "Phone",
+      type: "text",
+      placeholder: "+8801700000000",
+    },
+    {
+      name: "whatsapp",
+      label: "WhatsApp number",
+      type: "text",
+      placeholder: "+8801700000000",
+    },
+    {
+      name: "location",
+      label: "Location",
+      type: "text",
+      placeholder: "Dhaka, Bangladesh · Working worldwide",
+    },
     { name: "hourly_rate", label: "Hourly rate (USD)", type: "number", min: 0 },
     {
       name: "socials",
@@ -228,7 +307,7 @@ export default function ProfileSettings() {
     setLoading(true);
     setLoadError(null);
     try {
-      const { data } = await apiRequest<IProfile>("/profile", { token });
+      const { data } = await apiRequest<FormValues>("/profile", { token });
       setValues((data ?? {}) as FormValues);
     } catch (err) {
       setLoadError(err instanceof ApiClientError ? err.message : "Could not load the profile");
@@ -246,7 +325,7 @@ export default function ProfileSettings() {
     setSaving(true);
     setErrors({});
     try {
-      const { data } = await apiRequest<IProfile>("/profile", {
+      const { data } = await apiRequest<FormValues>("/profile", {
         method: "PATCH",
         body: values,
         token,

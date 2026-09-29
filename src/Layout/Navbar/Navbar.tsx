@@ -14,8 +14,8 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "Courses", href: "/courses" },
   { label: "Creators", href: "/creator-profile" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
+  // { label: "About", href: "/about" },
+  // { label: "Contact", href: "/contact" },
 ];
 
 const ACCOUNT_LINKS = [

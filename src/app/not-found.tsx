@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import NotFound from "@/Components/Frontend/Pages/NotFound/NotFound";
 
 export const metadata: Metadata = {
-  title: "Page not found | ByteSpace",
+  title: "Page Not Found",
   robots: { index: false },
 };
 

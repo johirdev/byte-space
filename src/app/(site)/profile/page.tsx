@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/config/seo";
 import { redirect } from "next/navigation";
 import Profile, { type ProfileTab } from "@/Components/Frontend/Pages/Profile/Profile";
 import { isSignedIn } from "@/app/lib/session";
 
-export const metadata: Metadata = { title: "My profile | ByteSpace" };
+export const metadata: Metadata = pageMetadata({
+  title: "My Profile",
+  path: "/profile",
+  noindex: true,
+});
 
 const TABS: ProfileTab[] = ["courses", "orders", "reviews", "settings"];
 
